@@ -1,0 +1,197 @@
+[
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/ContractCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/ContractCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/ContractCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/Decimal.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/Decimal.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/Decimal.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/DefaultEWrapper.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/DefaultEWrapper.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/DefaultEWrapper.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EClient.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EClient.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EClient.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EClientSocket.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EClientSocket.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EClientSocket.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EDecoder.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EDecoder.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EDecoder.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EMessage.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EMessage.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EMessage.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EMutex.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EMutex.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EMutex.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EOrderDecoder.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EOrderDecoder.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EOrderDecoder.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EReader.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EReader.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EReader.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/EReaderOSSignal.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EReaderOSSignal.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/EReaderOSSignal.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/ESocket.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/ESocket.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/ESocket.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/MarginCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/MarginCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/MarginCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/OperatorCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/OperatorCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/OperatorCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/OrderCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/OrderCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/OrderCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/PercentChangeCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/PercentChangeCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/PercentChangeCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/PriceCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/PriceCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/PriceCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/SoftDollarTier.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/SoftDollarTier.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/SoftDollarTier.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/StdAfx.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/StdAfx.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/StdAfx.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/TimeCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/TimeCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/TimeCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/Utils.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/Utils.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/Utils.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/VolumeCondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/VolumeCondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/VolumeCondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -w -std=c++20 -o CMakeFiles/ibkr_client.dir/third_party/twsapi/IBJts/source/cppclient/client/executioncondition.cpp.o -c /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/executioncondition.cpp",
+  "file": "/root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client/executioncondition.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/core/types.cpp.o -c /root/execution-journal/src/core/types.cpp",
+  "file": "/root/execution-journal/src/core/types.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/lifecycle/order_state.cpp.o -c /root/execution-journal/src/lifecycle/order_state.cpp",
+  "file": "/root/execution-journal/src/lifecycle/order_state.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/journal/journal.cpp.o -c /root/execution-journal/src/journal/journal.cpp",
+  "file": "/root/execution-journal/src/journal/journal.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/risk/risk_gate.cpp.o -c /root/execution-journal/src/risk/risk_gate.cpp",
+  "file": "/root/execution-journal/src/risk/risk_gate.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/recovery/reconcile.cpp.o -c /root/execution-journal/src/recovery/reconcile.cpp",
+  "file": "/root/execution-journal/src/recovery/reconcile.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_core.dir/src/ibkr/ibkr_broker.cpp.o -c /root/execution-journal/src/ibkr/ibkr_broker.cpp",
+  "file": "/root/execution-journal/src/ibkr/ibkr_broker.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_tests.dir/tests/test_types.cpp.o -c /root/execution-journal/tests/test_types.cpp",
+  "file": "/root/execution-journal/tests/test_types.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_tests.dir/tests/test_lifecycle.cpp.o -c /root/execution-journal/tests/test_lifecycle.cpp",
+  "file": "/root/execution-journal/tests/test_lifecycle.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_tests.dir/tests/test_journal.cpp.o -c /root/execution-journal/tests/test_journal.cpp",
+  "file": "/root/execution-journal/tests/test_journal.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_tests.dir/tests/test_risk.cpp.o -c /root/execution-journal/tests/test_risk.cpp",
+  "file": "/root/execution-journal/tests/test_risk.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej_tests.dir/tests/test_recovery.cpp.o -c /root/execution-journal/tests/test_recovery.cpp",
+  "file": "/root/execution-journal/tests/test_recovery.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan",
+  "command": "/usr/bin/c++  -I/root/execution-journal/src -isystem /root/execution-journal/third_party/twsapi/IBJts/source/cppclient/client -fsanitize=thread -g -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/ej-audit.dir/src/cli/main.cpp.o -c /root/execution-journal/src/cli/main.cpp",
+  "file": "/root/execution-journal/src/cli/main.cpp"
+},
+{
+  "directory": "/root/execution-journal/build-tsan/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -I/root/execution-journal/build-tsan/_deps/googletest-src/googlemock/include -I/root/execution-journal/build-tsan/_deps/googletest-src/googlemock -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /root/execution-journal/build-tsan/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "file": "/root/execution-journal/build-tsan/_deps/googletest-src/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/root/execution-journal/build-tsan/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googlemock/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googlemock -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /root/execution-journal/build-tsan/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "file": "/root/execution-journal/build-tsan/_deps/googletest-src/googlemock/src/gmock_main.cc"
+},
+{
+  "directory": "/root/execution-journal/build-tsan/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -I/root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -I/root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "file": "/root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/root/execution-journal/build-tsan/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest/include -isystem /root/execution-journal/build-tsan/_deps/googletest-src/googletest -fsanitize=thread -g -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wall -Wextra -Wpedantic -Wconversion -Wshadow -std=c++20 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "file": "/root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc"
+}
+]

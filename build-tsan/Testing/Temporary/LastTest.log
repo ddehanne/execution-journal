@@ -1,0 +1,786 @@
+Start testing: Jul 17 12:49 UTC
+----------------------------------------------------------
+1/29 Testing: UsdCents.AddIsExact
+1/29 Test: UsdCents.AddIsExact
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=UsdCents.AddIsExact" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"UsdCents.AddIsExact" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = UsdCents.AddIsExact
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UsdCents
+[ RUN      ] UsdCents.AddIsExact
+[       OK ] UsdCents.AddIsExact (0 ms)
+[----------] 1 test from UsdCents (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"UsdCents.AddIsExact" end time: Jul 17 12:49 UTC
+"UsdCents.AddIsExact" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/29 Testing: UsdCents.OverflowIsNulloptNotUB
+2/29 Test: UsdCents.OverflowIsNulloptNotUB
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=UsdCents.OverflowIsNulloptNotUB" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"UsdCents.OverflowIsNulloptNotUB" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = UsdCents.OverflowIsNulloptNotUB
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UsdCents
+[ RUN      ] UsdCents.OverflowIsNulloptNotUB
+[       OK ] UsdCents.OverflowIsNulloptNotUB (0 ms)
+[----------] 1 test from UsdCents (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"UsdCents.OverflowIsNulloptNotUB" end time: Jul 17 12:49 UTC
+"UsdCents.OverflowIsNulloptNotUB" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/29 Testing: Quantities.ValidationAtConstruction
+3/29 Test: Quantities.ValidationAtConstruction
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Quantities.ValidationAtConstruction" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Quantities.ValidationAtConstruction" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quantities.ValidationAtConstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quantities
+[ RUN      ] Quantities.ValidationAtConstruction
+[       OK ] Quantities.ValidationAtConstruction (0 ms)
+[----------] 1 test from Quantities (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Quantities.ValidationAtConstruction" end time: Jul 17 12:49 UTC
+"Quantities.ValidationAtConstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/29 Testing: Quantities.OverfillRepresentableAndNamed
+4/29 Test: Quantities.OverfillRepresentableAndNamed
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Quantities.OverfillRepresentableAndNamed" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Quantities.OverfillRepresentableAndNamed" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quantities.OverfillRepresentableAndNamed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quantities
+[ RUN      ] Quantities.OverfillRepresentableAndNamed
+[       OK ] Quantities.OverfillRepresentableAndNamed (0 ms)
+[----------] 1 test from Quantities (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Quantities.OverfillRepresentableAndNamed" end time: Jul 17 12:49 UTC
+"Quantities.OverfillRepresentableAndNamed" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/29 Testing: Quantities.FillAccumulationChecked
+5/29 Test: Quantities.FillAccumulationChecked
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Quantities.FillAccumulationChecked" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Quantities.FillAccumulationChecked" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quantities.FillAccumulationChecked
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quantities
+[ RUN      ] Quantities.FillAccumulationChecked
+[       OK ] Quantities.FillAccumulationChecked (0 ms)
+[----------] 1 test from Quantities (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Quantities.FillAccumulationChecked" end time: Jul 17 12:49 UTC
+"Quantities.FillAccumulationChecked" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/29 Testing: Sequence.SuccessorLaw
+6/29 Test: Sequence.SuccessorLaw
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Sequence.SuccessorLaw" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Sequence.SuccessorLaw" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Sequence.SuccessorLaw
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Sequence
+[ RUN      ] Sequence.SuccessorLaw
+[       OK ] Sequence.SuccessorLaw (0 ms)
+[----------] 1 test from Sequence (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Sequence.SuccessorLaw" end time: Jul 17 12:49 UTC
+"Sequence.SuccessorLaw" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/29 Testing: Lifecycle.OrdinaryPathToFilled
+7/29 Test: Lifecycle.OrdinaryPathToFilled
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Lifecycle.OrdinaryPathToFilled" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Lifecycle.OrdinaryPathToFilled" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.OrdinaryPathToFilled
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.OrdinaryPathToFilled
+[       OK ] Lifecycle.OrdinaryPathToFilled (0 ms)
+[----------] 1 test from Lifecycle (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Lifecycle.OrdinaryPathToFilled" end time: Jul 17 12:49 UTC
+"Lifecycle.OrdinaryPathToFilled" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/29 Testing: Lifecycle.FillBeforeAckAnomalousButApplied
+8/29 Test: Lifecycle.FillBeforeAckAnomalousButApplied
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Lifecycle.FillBeforeAckAnomalousButApplied" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Lifecycle.FillBeforeAckAnomalousButApplied" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.FillBeforeAckAnomalousButApplied
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.FillBeforeAckAnomalousButApplied
+[       OK ] Lifecycle.FillBeforeAckAnomalousButApplied (0 ms)
+[----------] 1 test from Lifecycle (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Lifecycle.FillBeforeAckAnomalousButApplied" end time: Jul 17 12:49 UTC
+"Lifecycle.FillBeforeAckAnomalousButApplied" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/29 Testing: Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved
+9/29 Test: Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved
+[       OK ] Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved (0 ms)
+[----------] 1 test from Lifecycle (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved" end time: Jul 17 12:49 UTC
+"Lifecycle.LateFillAfterCancelQuarantinedEvidencePreserved" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/29 Testing: Lifecycle.OverfillQuarantinesWithEvidence
+10/29 Test: Lifecycle.OverfillQuarantinesWithEvidence
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Lifecycle.OverfillQuarantinesWithEvidence" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Lifecycle.OverfillQuarantinesWithEvidence" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.OverfillQuarantinesWithEvidence
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.OverfillQuarantinesWithEvidence
+[       OK ] Lifecycle.OverfillQuarantinesWithEvidence (0 ms)
+[----------] 1 test from Lifecycle (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Lifecycle.OverfillQuarantinesWithEvidence" end time: Jul 17 12:49 UTC
+"Lifecycle.OverfillQuarantinesWithEvidence" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/29 Testing: Lifecycle.UndeclaredTransitionTypedErrorInputUntouched
+11/29 Test: Lifecycle.UndeclaredTransitionTypedErrorInputUntouched
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Lifecycle.UndeclaredTransitionTypedErrorInputUntouched" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Lifecycle.UndeclaredTransitionTypedErrorInputUntouched" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.UndeclaredTransitionTypedErrorInputUntouched
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.UndeclaredTransitionTypedErrorInputUntouched
+[       OK ] Lifecycle.UndeclaredTransitionTypedErrorInputUntouched (0 ms)
+[----------] 1 test from Lifecycle (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Lifecycle.UndeclaredTransitionTypedErrorInputUntouched" end time: Jul 17 12:49 UTC
+"Lifecycle.UndeclaredTransitionTypedErrorInputUntouched" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/29 Testing: Sha256.FipsVectors
+12/29 Test: Sha256.FipsVectors
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Sha256.FipsVectors" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Sha256.FipsVectors" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Sha256.FipsVectors
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Sha256
+[ RUN      ] Sha256.FipsVectors
+[       OK ] Sha256.FipsVectors (0 ms)
+[----------] 1 test from Sha256 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Sha256.FipsVectors" end time: Jul 17 12:49 UTC
+"Sha256.FipsVectors" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/29 Testing: Journal.RoundTrip
+13/29 Test: Journal.RoundTrip
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.RoundTrip" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.RoundTrip" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.RoundTrip
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.RoundTrip
+[       OK ] Journal.RoundTrip (8 ms)
+[----------] 1 test from Journal (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (9 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.RoundTrip" end time: Jul 17 12:49 UTC
+"Journal.RoundTrip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/29 Testing: Journal.TornFinalLineRecovered
+14/29 Test: Journal.TornFinalLineRecovered
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.TornFinalLineRecovered" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.TornFinalLineRecovered" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.TornFinalLineRecovered
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.TornFinalLineRecovered
+[       OK ] Journal.TornFinalLineRecovered (9 ms)
+[----------] 1 test from Journal (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (9 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.TornFinalLineRecovered" end time: Jul 17 12:49 UTC
+"Journal.TornFinalLineRecovered" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/29 Testing: Journal.MissingTrailingNewlineOnValidLastLineIsFine
+15/29 Test: Journal.MissingTrailingNewlineOnValidLastLineIsFine
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.MissingTrailingNewlineOnValidLastLineIsFine" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.MissingTrailingNewlineOnValidLastLineIsFine" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.MissingTrailingNewlineOnValidLastLineIsFine
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.MissingTrailingNewlineOnValidLastLineIsFine
+[       OK ] Journal.MissingTrailingNewlineOnValidLastLineIsFine (4 ms)
+[----------] 1 test from Journal (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.MissingTrailingNewlineOnValidLastLineIsFine" end time: Jul 17 12:49 UTC
+"Journal.MissingTrailingNewlineOnValidLastLineIsFine" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/29 Testing: Journal.InteriorCorruptionFatal
+16/29 Test: Journal.InteriorCorruptionFatal
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.InteriorCorruptionFatal" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.InteriorCorruptionFatal" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.InteriorCorruptionFatal
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.InteriorCorruptionFatal
+[       OK ] Journal.InteriorCorruptionFatal (6 ms)
+[----------] 1 test from Journal (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (6 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.InteriorCorruptionFatal" end time: Jul 17 12:49 UTC
+"Journal.InteriorCorruptionFatal" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/29 Testing: Journal.RemovedInteriorLineBreaksChain
+17/29 Test: Journal.RemovedInteriorLineBreaksChain
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.RemovedInteriorLineBreaksChain" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.RemovedInteriorLineBreaksChain" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.RemovedInteriorLineBreaksChain
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.RemovedInteriorLineBreaksChain
+[       OK ] Journal.RemovedInteriorLineBreaksChain (6 ms)
+[----------] 1 test from Journal (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (6 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.RemovedInteriorLineBreaksChain" end time: Jul 17 12:49 UTC
+"Journal.RemovedInteriorLineBreaksChain" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/29 Testing: Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload
+18/29 Test: Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Journal
+[ RUN      ] Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload
+[       OK ] Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload (2 ms)
+[----------] 1 test from Journal (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload" end time: Jul 17 12:49 UTC
+"Journal.AppendRefusesNonContiguousSequenceAndNewlinePayload" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/29 Testing: Risk.KillSwitchDominatesEverything
+19/29 Test: Risk.KillSwitchDominatesEverything
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.KillSwitchDominatesEverything" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.KillSwitchDominatesEverything" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.KillSwitchDominatesEverything
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.KillSwitchDominatesEverything
+[       OK ] Risk.KillSwitchDominatesEverything (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.KillSwitchDominatesEverything" end time: Jul 17 12:49 UTC
+"Risk.KillSwitchDominatesEverything" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/29 Testing: Risk.KillSwitchIsFileLatch
+20/29 Test: Risk.KillSwitchIsFileLatch
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.KillSwitchIsFileLatch" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.KillSwitchIsFileLatch" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.KillSwitchIsFileLatch
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.KillSwitchIsFileLatch
+[       OK ] Risk.KillSwitchIsFileLatch (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.KillSwitchIsFileLatch" end time: Jul 17 12:49 UTC
+"Risk.KillSwitchIsFileLatch" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/29 Testing: Risk.NotionalCap
+21/29 Test: Risk.NotionalCap
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.NotionalCap" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.NotionalCap" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.NotionalCap
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.NotionalCap
+[       OK ] Risk.NotionalCap (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.NotionalCap" end time: Jul 17 12:49 UTC
+"Risk.NotionalCap" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/29 Testing: Risk.PositionCapOnProjectedNet
+22/29 Test: Risk.PositionCapOnProjectedNet
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.PositionCapOnProjectedNet" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.PositionCapOnProjectedNet" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.PositionCapOnProjectedNet
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.PositionCapOnProjectedNet
+[       OK ] Risk.PositionCapOnProjectedNet (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.PositionCapOnProjectedNet" end time: Jul 17 12:49 UTC
+"Risk.PositionCapOnProjectedNet" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/29 Testing: Risk.PriceBandAndOverflow
+23/29 Test: Risk.PriceBandAndOverflow
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.PriceBandAndOverflow" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.PriceBandAndOverflow" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.PriceBandAndOverflow
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.PriceBandAndOverflow
+[       OK ] Risk.PriceBandAndOverflow (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.PriceBandAndOverflow" end time: Jul 17 12:49 UTC
+"Risk.PriceBandAndOverflow" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/29 Testing: Risk.ConfigHashDeterministicAndVersionSensitive
+24/29 Test: Risk.ConfigHashDeterministicAndVersionSensitive
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Risk.ConfigHashDeterministicAndVersionSensitive" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Risk.ConfigHashDeterministicAndVersionSensitive" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Risk.ConfigHashDeterministicAndVersionSensitive
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Risk
+[ RUN      ] Risk.ConfigHashDeterministicAndVersionSensitive
+[       OK ] Risk.ConfigHashDeterministicAndVersionSensitive (0 ms)
+[----------] 1 test from Risk (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Risk.ConfigHashDeterministicAndVersionSensitive" end time: Jul 17 12:49 UTC
+"Risk.ConfigHashDeterministicAndVersionSensitive" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/29 Testing: Reconcile.CleanStateAllowsTrading
+25/29 Test: Reconcile.CleanStateAllowsTrading
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Reconcile.CleanStateAllowsTrading" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Reconcile.CleanStateAllowsTrading" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Reconcile.CleanStateAllowsTrading
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Reconcile
+[ RUN      ] Reconcile.CleanStateAllowsTrading
+[       OK ] Reconcile.CleanStateAllowsTrading (0 ms)
+[----------] 1 test from Reconcile (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Reconcile.CleanStateAllowsTrading" end time: Jul 17 12:49 UTC
+"Reconcile.CleanStateAllowsTrading" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/29 Testing: Reconcile.PhantomBrokerPosition_RGTIClass
+26/29 Test: Reconcile.PhantomBrokerPosition_RGTIClass
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Reconcile.PhantomBrokerPosition_RGTIClass" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Reconcile.PhantomBrokerPosition_RGTIClass" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Reconcile.PhantomBrokerPosition_RGTIClass
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Reconcile
+[ RUN      ] Reconcile.PhantomBrokerPosition_RGTIClass
+[       OK ] Reconcile.PhantomBrokerPosition_RGTIClass (0 ms)
+[----------] 1 test from Reconcile (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Reconcile.PhantomBrokerPosition_RGTIClass" end time: Jul 17 12:49 UTC
+"Reconcile.PhantomBrokerPosition_RGTIClass" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/29 Testing: Reconcile.QuantityDivergence_PM018InversionClass
+27/29 Test: Reconcile.QuantityDivergence_PM018InversionClass
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Reconcile.QuantityDivergence_PM018InversionClass" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Reconcile.QuantityDivergence_PM018InversionClass" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Reconcile.QuantityDivergence_PM018InversionClass
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Reconcile
+[ RUN      ] Reconcile.QuantityDivergence_PM018InversionClass
+[       OK ] Reconcile.QuantityDivergence_PM018InversionClass (0 ms)
+[----------] 1 test from Reconcile (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Reconcile.QuantityDivergence_PM018InversionClass" end time: Jul 17 12:49 UTC
+"Reconcile.QuantityDivergence_PM018InversionClass" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/29 Testing: Reconcile.MissingBrokerPositionAndZeroIsNotAPosition
+28/29 Test: Reconcile.MissingBrokerPositionAndZeroIsNotAPosition
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Reconcile.MissingBrokerPositionAndZeroIsNotAPosition" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Reconcile.MissingBrokerPositionAndZeroIsNotAPosition" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Reconcile.MissingBrokerPositionAndZeroIsNotAPosition
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Reconcile
+[ RUN      ] Reconcile.MissingBrokerPositionAndZeroIsNotAPosition
+[       OK ] Reconcile.MissingBrokerPositionAndZeroIsNotAPosition (0 ms)
+[----------] 1 test from Reconcile (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Reconcile.MissingBrokerPositionAndZeroIsNotAPosition" end time: Jul 17 12:49 UTC
+"Reconcile.MissingBrokerPositionAndZeroIsNotAPosition" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/29 Testing: Reconcile.OrderBookLies
+29/29 Test: Reconcile.OrderBookLies
+Command: "/root/execution-journal/build-tsan/ej_tests" "--gtest_filter=Reconcile.OrderBookLies" "--gtest_also_run_disabled_tests"
+Directory: /root/execution-journal/build-tsan
+"Reconcile.OrderBookLies" start time: Jul 17 12:49 UTC
+Output:
+----------------------------------------------------------
+Running main() from /root/execution-journal/build-tsan/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Reconcile.OrderBookLies
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Reconcile
+[ RUN      ] Reconcile.OrderBookLies
+[       OK ] Reconcile.OrderBookLies (0 ms)
+[----------] 1 test from Reconcile (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Reconcile.OrderBookLies" end time: Jul 17 12:49 UTC
+"Reconcile.OrderBookLies" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 17 12:49 UTC
