@@ -19,6 +19,7 @@ add_library(ej_core
   src/lifecycle/order_state.cpp
   src/journal/journal.cpp
   src/risk/risk_gate.cpp
+  src/recovery/reconcile.cpp
 )
 target_include_directories(ej_core PUBLIC src)
 
@@ -31,7 +32,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test_journal.cpp tests/test_risk.cpp)
+add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test_journal.cpp tests/test_risk.cpp tests/test_recovery.cpp)
 target_link_libraries(ej_tests PRIVATE ej_core gtest_main)
 include(GoogleTest)
 gtest_discover_tests(ej_tests)
