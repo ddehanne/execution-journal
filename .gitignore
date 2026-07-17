@@ -1,3 +1,7 @@
 build/
 *.env
 config_local.*
+
+# IBKR TWS API — NOT redistributable (IBKR license). Never commit.
+third_party/twsapi/
+third_party/twsapi.zip
