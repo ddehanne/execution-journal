@@ -36,3 +36,6 @@ add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test
 target_link_libraries(ej_tests PRIVATE ej_core gtest_main)
 include(GoogleTest)
 gtest_discover_tests(ej_tests)
+
+add_executable(ej-audit src/cli/main.cpp)
+target_link_libraries(ej-audit PRIVATE ej_core)
