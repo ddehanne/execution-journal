@@ -20,7 +20,7 @@ namespace ej::ibkr {
 struct ConnectParams {
   std::string host = "127.0.0.1";
   int port = 4002;          // paper gateway
-  int client_id = 71;       // distinct from pipeline writers (44/45…)
+  int client_id = 71;       // dedicated id for this engine
   int timeout_ms = 15000;
 };
 
