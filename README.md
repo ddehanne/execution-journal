@@ -3,8 +3,11 @@
 C++20 execution integrity engine — order lifecycle, durable journaling,
 crash recovery, and broker reconciliation for systematic trading systems.
 
-**Status: private research project, pre-v0.1.** 6 of 7 modules complete;
-IBKR adapter integrated but not yet exercised against a live gateway.
+**Status: v0.1.** All 7 modules complete. The IBKR adapter has been
+exercised against a live paper gateway (read-only snapshot): session
+establishment, position/order retrieval under ASan+UBSan, and clean
+teardown — with positions cross-validated symbol-by-symbol against an
+independent ledger implementation.
 
 Companion to [verified-ledger](https://github.com/ddehanne/verified-ledger)
 (Rust): the same correctness contract, carried from formal verification
@@ -63,17 +66,20 @@ src/cli/        ej-audit verify|status|replay (exit 0/2/1)
   healed), missing trailing newline, interior corruption (fatal at exact
   line), removed interior line (chain break), crash → reopen → heal →
   append
+- Fault injection with REAL process kills: SIGKILL mid-append storm
+  (reopen heals), crash between durability barrier and dispatch (intent
+  recovered as eligible-never-dispatched — no blind-resubmission path),
+  mute-broker partial snapshot (trading refused by composition)
+- TSan build: full suite, zero data races
 - One-command health: `./check.sh` (build + ctest + CLI smoke)
 
 ## Build
 
 Requires the IBKR TWS API (not vendored — see `third_party/README.md`).
 mkdir -p build && cd build && cmake .. && make -j2 && ctest
-## Roadmap to v0.1
+## Roadmap beyond v0.1
 
-- M6 exercised against IBKR paper gateway (read-only snapshot first)
-- Fault injection: crash mid-append, crash between durability and
-  dispatch, broker disconnect mid-session
-- Micro-live: small real orders, measured slippage, zero duplicate
-  submissions across restarts
-- Secrets/paths/history audit → sanitized public mirror
+- Broker-disconnect-mid-session fault scenario
+- Micro-live: small real orders, measured slippage, duplicate-submission
+  accounting across restarts
+- TSan run against a live gateway session
