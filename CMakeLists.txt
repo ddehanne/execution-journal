@@ -25,7 +25,11 @@ if(SANITIZE)
   target_compile_options(ibkr_client PRIVATE -fsanitize=address,undefined)
 endif()
 find_package(Threads REQUIRED)
-target_link_libraries(ibkr_client PUBLIC Threads::Threads)
+# Intel Decimal FP lib — required by TWS Decimal.cpp (bid64 symbols).
+# Not vendored (see third_party/README.md); built per Intel_lib_build.txt.
+target_link_libraries(ibkr_client PUBLIC
+  ${CMAKE_SOURCE_DIR}/third_party/IntelRDFPMathLib20U2/LIBRARY/libbid.a
+  Threads::Threads)
 
 add_library(ej_core
   src/core/types.cpp

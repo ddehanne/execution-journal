@@ -5,3 +5,5 @@ config_local.*
 # IBKR TWS API — NOT redistributable (IBKR license). Never commit.
 third_party/twsapi/
 third_party/twsapi.zip
+third_party/IntelRDFPMathLib20U2/
+third_party/intel_rdfp.tar.gz
