@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
+#include <unistd.h>
 
 #include <cstdio>
 #include <fstream>
+#include <limits>
 
 #include "risk/risk_gate.hpp"
 
@@ -41,6 +43,33 @@ TEST(Risk, KillSwitchIsFileLatch) {
   EXPECT_FALSE(kill_switch_active(latch));
 }
 
+
+TEST(Risk, KillSwitchFailsClosedOnFilesystemAnomalies) {
+  const std::string base =
+      "/tmp/ej_kill_switch_fail_closed_" +
+      std::to_string(::getpid());
+
+  const std::string broken_link = base + "_link";
+  const std::string regular_file = base + "_file";
+
+  std::remove(broken_link.c_str());
+  std::remove(regular_file.c_str());
+
+  ASSERT_EQ(::symlink("/definitely/missing/ej_kill_target",
+                      broken_link.c_str()), 0);
+  EXPECT_TRUE(kill_switch_active(broken_link));
+  EXPECT_EQ(std::remove(broken_link.c_str()), 0);
+
+  {
+    std::ofstream out(regular_file);
+    ASSERT_TRUE(out.good());
+    out << "not a directory";
+  }
+
+  EXPECT_TRUE(kill_switch_active(regular_file + "/latch"));
+  EXPECT_EQ(std::remove(regular_file.c_str()), 0);
+}
+
 TEST(Risk, NotionalCap) {
   // 200 units × $600 = $120k > $100k cap
   const auto r = check_intent(cfg(), intent(Side::Buy, 200, 60'000), 0, false);
@@ -63,6 +92,18 @@ TEST(Risk, PositionCapOnProjectedNet) {
   // Reducing exposure is fine: net 950, Sell 100 => 850
   EXPECT_FALSE(check_intent(cfg(), intent(Side::Sell, 100, 1'000), 950, false)
                    .has_value());
+}
+
+
+TEST(Risk, Int64MinProjectedPositionIsRejectedWithoutOverflow) {
+  const auto r = check_intent(
+      cfg(),
+      intent(Side::Sell, 1, 1'000),
+      std::numeric_limits<std::int64_t>::min() + 1,
+      false);
+
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(*r, RefusalReason::PositionCapExceeded);
 }
 
 TEST(Risk, PriceBandAndOverflow) {

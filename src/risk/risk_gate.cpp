@@ -1,6 +1,7 @@
 #include "risk/risk_gate.hpp"
 
 #include <sys/stat.h>
+#include <cerrno>
 
 #include <sstream>
 
@@ -18,7 +19,14 @@ std::string RiskConfig::content_hash() const {
 
 bool kill_switch_active(const std::string& latch_path) {
   struct stat st{};
-  return ::stat(latch_path.c_str(), &st) == 0;
+
+  // A present latch, including a broken symlink, blocks trading.
+  if (::lstat(latch_path.c_str(), &st) == 0) {
+    return true;
+  }
+
+  // Unknown filesystem state must never authorize trading.
+  return errno != ENOENT;
 }
 
 std::optional<RefusalReason> check_intent(
@@ -53,8 +61,11 @@ std::optional<RefusalReason> check_intent(
                              &projected)) {
     return RefusalReason::PositionCapExceeded;  // overflow => certainly over
   }
-  const std::int64_t abs_projected = projected < 0 ? -projected : projected;
-  if (abs_projected > config.max_position_units) {
+  // Avoid negating INT64_MIN, which would overflow a signed integer.
+  // Compare against symmetric bounds instead.
+  if (config.max_position_units < 0 ||
+      projected > config.max_position_units ||
+      projected < -config.max_position_units) {
     return RefusalReason::PositionCapExceeded;
   }
 
