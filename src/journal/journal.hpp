@@ -87,6 +87,7 @@ class JournalWriter {
   std::string path_;
   int fd_;
   int lock_fd_;
+  bool poisoned_ = false;
   std::string last_hash_;
   std::uint64_t next_seq_;
 };

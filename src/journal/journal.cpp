@@ -185,6 +185,7 @@ JournalWriter::JournalWriter(JournalWriter&& o) noexcept
     : path_(std::move(o.path_)),
       fd_(o.fd_),
       lock_fd_(o.lock_fd_),
+      poisoned_(o.poisoned_),
       last_hash_(std::move(o.last_hash_)),
       next_seq_(o.next_seq_) {
   o.fd_ = -1;
@@ -198,6 +199,7 @@ JournalWriter& JournalWriter::operator=(JournalWriter&& o) noexcept {
     path_ = std::move(o.path_);
     fd_ = o.fd_;
     lock_fd_ = o.lock_fd_;
+    poisoned_ = o.poisoned_;
     last_hash_ = std::move(o.last_hash_);
     next_seq_ = o.next_seq_;
     o.fd_ = -1;
@@ -278,6 +280,9 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
 }
 
 std::optional<JournalError> JournalWriter::append(const Record& record) {
+  if (poisoned_) {
+    return JournalError{JournalErrorKind::IoFailure, 0, "writer poisoned"};
+  }
   if (record.payload.find('\n') != std::string::npos) {
     return JournalError{JournalErrorKind::InvalidPayload, 0,
                         "payload contains newline"};
@@ -295,14 +300,17 @@ std::optional<JournalError> JournalWriter::append(const Record& record) {
 
   std::size_t written = 0;
   while (written < line.size()) {
-    const ssize_t n = ::write(fd_, line.data() + written, line.size() - written);
-    if (n < 0) {
+    const ssize_t n = ::write(
+        fd_, line.data() + written, line.size() - written);
+    if (n <= 0) {
+      poisoned_ = true;
       return JournalError{JournalErrorKind::IoFailure, 0, "write"};
     }
     written += static_cast<std::size_t>(n);
   }
   // Durability barrier — success past this point IS dispatch eligibility.
   if (::fsync(fd_) != 0) {
+    poisoned_ = true;
     return JournalError{JournalErrorKind::IoFailure, 0, "fsync"};
   }
   last_hash_ = record_hash;

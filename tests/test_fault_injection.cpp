@@ -4,11 +4,14 @@
 //     eligible-never-dispatched; no blind resubmission path exists
 // F3: mute broker (empty snapshot) vs local state => mismatches => refusal
 #include <gtest/gtest.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <csignal>
 #include <cstdio>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -155,4 +158,167 @@ TEST(FaultInjection, SingleWriterExclusiveAcrossProcesses) {
   // Both writers are destroyed before cleanup.
   std::remove(path.c_str());
   std::remove(lock_path.c_str());
+}
+
+
+namespace {
+
+// Find the descriptor owned by the journal writer.
+// Test-only helper; no production API changes.
+int journal_fd_for(const std::string& path) {
+  struct stat target{};
+  if (::stat(path.c_str(), &target) != 0) return -1;
+
+  int found = -1;
+
+  for (int fd = 3; fd < 1024; ++fd) {
+    struct stat candidate{};
+    if (::fstat(fd, &candidate) == 0 &&
+        candidate.st_dev == target.st_dev &&
+        candidate.st_ino == target.st_ino) {
+      // Ambiguous ownership: never redirect an arbitrary descriptor.
+      if (found != -1) return -1;
+      found = fd;
+    }
+  }
+
+  return found;
+}
+
+}  // namespace
+
+TEST(FaultInjection, WriterPoisonedAfterWriteFailure) {
+  const auto path = tmp_path("poison");
+  std::remove(path.c_str());
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+    auto& writer = std::get<JournalWriter>(opened);
+
+    const int journal_fd = journal_fd_for(path);
+    ASSERT_GE(journal_fd, 0);
+
+    const int readonly_fd = ::open("/dev/null", O_RDONLY);
+    ASSERT_GE(readonly_fd, 0);
+
+    ASSERT_EQ(::dup2(readonly_fd, journal_fd), journal_fd);
+    if (readonly_fd != journal_fd) {
+      ASSERT_EQ(::close(readonly_fd), 0);
+    }
+
+    const auto first = writer.append({1, "intent"});
+    ASSERT_TRUE(first.has_value());
+    EXPECT_EQ(first->kind, JournalErrorKind::IoFailure);
+
+    // A poisoned writer must reject BEFORE payload/sequence validation.
+    const auto second = writer.append({999, "retry"});
+    ASSERT_TRUE(second.has_value());
+    EXPECT_EQ(second->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(second->detail, "writer poisoned");
+  }
+
+  std::remove(path.c_str());
+  std::remove((path + ".lock").c_str());
+}
+
+
+TEST(FaultInjection, PoisonedStateSurvivesMoveOperations) {
+  const auto path = tmp_path("poison_move");
+  const auto other_path = tmp_path("poison_move_other");
+
+  // These files are test-owned; no active writer may exist here.
+  std::remove(path.c_str());
+  std::remove((path + ".lock").c_str());
+  std::remove(other_path.c_str());
+  std::remove((other_path + ".lock").c_str());
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+
+    auto& original = std::get<JournalWriter>(opened);
+
+    const int journal_fd = journal_fd_for(path);
+    ASSERT_GE(journal_fd, 0);
+
+    const int readonly_fd = ::open("/dev/null", O_RDONLY);
+    ASSERT_GE(readonly_fd, 0);
+
+    ASSERT_EQ(::dup2(readonly_fd, journal_fd), journal_fd);
+    if (readonly_fd != journal_fd) {
+      ASSERT_EQ(::close(readonly_fd), 0);
+    }
+
+    const auto failure = original.append({1, "intent"});
+    ASSERT_TRUE(failure.has_value());
+    ASSERT_EQ(failure->kind, JournalErrorKind::IoFailure);
+
+    // Move constructor must preserve poison.
+    JournalWriter moved(std::move(original));
+
+    const auto after_move = moved.append({999, "retry"});
+    ASSERT_TRUE(after_move.has_value());
+    EXPECT_EQ(after_move->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(after_move->detail, "writer poisoned");
+
+    // Move assignment must also preserve poison.
+    auto replacement = JournalWriter::open(other_path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(replacement));
+
+    auto& destination = std::get<JournalWriter>(replacement);
+    destination = std::move(moved);
+
+    const auto after_assignment = destination.append({999, "retry"});
+    ASSERT_TRUE(after_assignment.has_value());
+    EXPECT_EQ(after_assignment->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(after_assignment->detail, "writer poisoned");
+  }
+
+  std::remove(path.c_str());
+  std::remove((path + ".lock").c_str());
+  std::remove(other_path.c_str());
+  std::remove((other_path + ".lock").c_str());
+}
+
+
+TEST(FaultInjection, WriterPoisonedAfterFsyncFailure) {
+  const auto path = tmp_path("fsync_poison");
+
+  std::remove(path.c_str());
+  std::remove((path + ".lock").c_str());
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+
+    auto& writer = std::get<JournalWriter>(opened);
+
+    const int journal_fd = journal_fd_for(path);
+    ASSERT_GE(journal_fd, 0);
+
+    int pipe_fds[2]{};
+    ASSERT_EQ(::pipe(pipe_fds), 0);
+
+    ASSERT_EQ(::dup2(pipe_fds[1], journal_fd), journal_fd);
+
+    if (pipe_fds[1] != journal_fd) {
+      ASSERT_EQ(::close(pipe_fds[1]), 0);
+    }
+
+    const auto first = writer.append({1, "durability-test"});
+    ASSERT_TRUE(first.has_value());
+    EXPECT_EQ(first->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(first->detail, "fsync");
+
+    const auto second = writer.append({999, "retry"});
+    ASSERT_TRUE(second.has_value());
+    EXPECT_EQ(second->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(second->detail, "writer poisoned");
+
+    ASSERT_EQ(::close(pipe_fds[0]), 0);
+  }
+
+  std::remove(path.c_str());
+  std::remove((path + ".lock").c_str());
 }
