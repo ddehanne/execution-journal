@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <sys/file.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -163,13 +164,51 @@ ReadResult parse_journal_bytes(const std::string& bytes) {
 }
 
 ReadResult read_journal(const std::string& path) {
-  std::ifstream in(path, std::ios::binary);
-  if (!in) {
-    return Recovered{{}, kGenesisHash, false};  // missing = empty journal
+  const int fd = ::open(path.c_str(), O_RDONLY);
+  if (fd < 0) {
+    const int open_errno = errno;
+
+    if (open_errno == ENOENT) {
+      struct stat st{};
+
+      if (::lstat(path.c_str(), &st) != 0 && errno == ENOENT) {
+        return Recovered{{}, kGenesisHash, false};
+      }
+    }
+
+    return JournalError{JournalErrorKind::IoFailure, 0,
+                        "open journal for read"};
   }
-  std::ostringstream ss;
-  ss << in.rdbuf();
-  return parse_journal_bytes(ss.str());
+
+  struct stat st{};
+  if (::fstat(fd, &st) != 0 || !S_ISREG(st.st_mode)) {
+    ::close(fd);
+    return JournalError{JournalErrorKind::IoFailure, 0,
+                        "journal is not a regular file"};
+  }
+
+  std::string bytes;
+  char buffer[8192];
+
+  for (;;) {
+    const ssize_t n = ::read(fd, buffer, sizeof(buffer));
+    if (n > 0) {
+      bytes.append(buffer, static_cast<std::size_t>(n));
+    } else if (n == 0) {
+      break;
+    } else if (errno != EINTR) {
+      ::close(fd);
+      return JournalError{JournalErrorKind::IoFailure, 0,
+                          "read journal"};
+    }
+  }
+
+  if (::close(fd) != 0) {
+    return JournalError{JournalErrorKind::IoFailure, 0,
+                        "close journal after read"};
+  }
+
+  return parse_journal_bytes(bytes);
 }
 
 JournalWriter::JournalWriter(std::string path, int fd, int lock_fd,

@@ -4,6 +4,8 @@
 
 #include <cstdio>
 #include <fstream>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string>
 
 #include "journal/journal.hpp"
@@ -240,4 +242,36 @@ TEST(Journal, ReopenRepairsMissingFinalNewlineBeforeAppend) {
   ASSERT_EQ(recovered.records.size(), 3u);
   EXPECT_EQ(recovered.records[2].sequence, 3u);
   EXPECT_EQ(recovered.records[2].payload, "third");
+}
+
+TEST(Journal, MissingFileIsEmpty) {
+  TmpFile f;
+  const auto result = read_journal(f.path());
+  ASSERT_TRUE(std::holds_alternative<Recovered>(result));
+  EXPECT_TRUE(ok(result).records.empty());
+}
+
+TEST(Journal, DirectoryIsNotAnEmptyJournal) {
+  TmpFile f;
+  ASSERT_EQ(::mkdir(f.path().c_str(), 0700), 0);
+
+  const auto result = read_journal(f.path());
+  ASSERT_TRUE(std::holds_alternative<JournalError>(result));
+  EXPECT_EQ(err(result).kind, JournalErrorKind::IoFailure);
+
+  EXPECT_EQ(::rmdir(f.path().c_str()), 0);
+}
+
+TEST(Journal, BrokenSymlinkMustNotBeTreatedAsMissing) {
+  TmpFile f;
+  const std::string missing_target = f.path() + ".nonexistent";
+
+  ASSERT_EQ(::symlink(missing_target.c_str(), f.path().c_str()), 0);
+
+  const auto result = read_journal(f.path());
+
+  ASSERT_TRUE(std::holds_alternative<JournalError>(result))
+      << "A dangling symlink must not initialize an empty journal";
+
+  EXPECT_EQ(err(result).kind, JournalErrorKind::IoFailure);
 }
