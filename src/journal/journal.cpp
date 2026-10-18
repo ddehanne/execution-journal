@@ -396,6 +396,22 @@ JournalWriter::~JournalWriter() {
   if (lock_fd_ >= 0) ::close(lock_fd_);
 }
 
+ReadResult JournalWriter::snapshot() const {
+  if (fd_ < 0 || poisoned_ || !same_file(fd_, path_)) {
+    return JournalError{
+        JournalErrorKind::IoFailure,
+        0,
+        "Writer unavailable or journal identity changed"};
+  }
+
+  auto bytes = read_from_fd(fd_);
+  if (const auto* error = std::get_if<JournalError>(&bytes)) {
+    return *error;
+  }
+
+  return parse_journal_bytes(std::get<std::string>(bytes));
+}
+
 std::variant<JournalWriter, JournalError> JournalWriter::open(
     const std::string& path) {
 

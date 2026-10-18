@@ -81,6 +81,9 @@ class JournalWriter {
   [[nodiscard]] const std::string& last_hash() const noexcept { return last_hash_; }
   [[nodiscard]] std::uint64_t next_sequence() const noexcept { return next_seq_; }
 
+  // Read while this writer holds the exclusive journal lock.
+  [[nodiscard]] ReadResult snapshot() const;
+
  private:
   JournalWriter(std::string path, int fd, int lock_fd,
                 std::string last_hash, std::uint64_t next_seq) noexcept;

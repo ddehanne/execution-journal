@@ -21,6 +21,7 @@ add_library(ej_core
   src/journal/journal.cpp
   src/risk/risk_gate.cpp
   src/recovery/reconcile.cpp
+  src/execution/coordinator.cpp
 )
 target_include_directories(ej_core PUBLIC src)
 if(EJ_WITH_IBKR)
@@ -72,7 +73,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test_journal.cpp tests/test_risk.cpp tests/test_recovery.cpp tests/test_fault_injection.cpp)
+add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test_journal.cpp tests/test_risk.cpp tests/test_recovery.cpp tests/test_fault_injection.cpp tests/test_coordinator.cpp)
 # Test-only core: same sources, isolated fault-injection build.
 get_target_property(EJ_CORE_SOURCES ej_core SOURCES)
 
