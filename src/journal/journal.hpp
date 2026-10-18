@@ -82,10 +82,11 @@ class JournalWriter {
   [[nodiscard]] std::uint64_t next_sequence() const noexcept { return next_seq_; }
 
  private:
-  JournalWriter(std::string path, int fd, std::string last_hash,
-                std::uint64_t next_seq) noexcept;
+  JournalWriter(std::string path, int fd, int lock_fd,
+                std::string last_hash, std::uint64_t next_seq) noexcept;
   std::string path_;
   int fd_;
+  int lock_fd_;
   std::string last_hash_;
   std::uint64_t next_seq_;
 };

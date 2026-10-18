@@ -1,6 +1,7 @@
 #include "journal/journal.hpp"
 
 #include <fcntl.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -171,39 +172,66 @@ ReadResult read_journal(const std::string& path) {
   return parse_journal_bytes(ss.str());
 }
 
-JournalWriter::JournalWriter(std::string path, int fd, std::string last_hash,
+JournalWriter::JournalWriter(std::string path, int fd, int lock_fd,
+                             std::string last_hash,
                              std::uint64_t next_seq) noexcept
     : path_(std::move(path)),
       fd_(fd),
+      lock_fd_(lock_fd),
       last_hash_(std::move(last_hash)),
       next_seq_(next_seq) {}
 
 JournalWriter::JournalWriter(JournalWriter&& o) noexcept
     : path_(std::move(o.path_)),
       fd_(o.fd_),
+      lock_fd_(o.lock_fd_),
       last_hash_(std::move(o.last_hash_)),
       next_seq_(o.next_seq_) {
   o.fd_ = -1;
+  o.lock_fd_ = -1;
 }
 
 JournalWriter& JournalWriter::operator=(JournalWriter&& o) noexcept {
   if (this != &o) {
     if (fd_ >= 0) ::close(fd_);
+    if (lock_fd_ >= 0) ::close(lock_fd_);
     path_ = std::move(o.path_);
     fd_ = o.fd_;
+    lock_fd_ = o.lock_fd_;
     last_hash_ = std::move(o.last_hash_);
     next_seq_ = o.next_seq_;
     o.fd_ = -1;
+    o.lock_fd_ = -1;
   }
   return *this;
 }
 
 JournalWriter::~JournalWriter() {
   if (fd_ >= 0) ::close(fd_);
+  if (lock_fd_ >= 0) ::close(lock_fd_);
 }
 
 std::variant<JournalWriter, JournalError> JournalWriter::open(
     const std::string& path) {
+  const std::string lock_path = path + ".lock";
+  const int lock_fd = ::open(lock_path.c_str(), O_RDWR | O_CREAT, 0644);
+  if (lock_fd < 0) {
+    return JournalError{JournalErrorKind::IoFailure, 0, "open lock"};
+  }
+
+  if (::flock(lock_fd, LOCK_EX | LOCK_NB) != 0) {
+    ::close(lock_fd);
+    return JournalError{JournalErrorKind::IoFailure, 0,
+                        "writer lock unavailable"};
+  }
+
+  // Own the lock through every early-return path until ownership
+  // transfers to JournalWriter.
+  struct LockGuard {
+    int fd;
+    ~LockGuard() { if (fd >= 0) ::close(fd); }
+  } guard{lock_fd};
+
   auto read = read_journal(path);
   if (const auto* err = std::get_if<JournalError>(&read)) {
     return *err;
@@ -245,7 +273,8 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
 
   const std::uint64_t next_seq =
       rec.records.empty() ? 1 : rec.records.back().sequence + 1;
-  return JournalWriter(path, fd, rec.last_hash, next_seq);
+  guard.fd = -1;
+  return JournalWriter(path, fd, lock_fd, rec.last_hash, next_seq);
 }
 
 std::optional<JournalError> JournalWriter::append(const Record& record) {

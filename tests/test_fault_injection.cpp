@@ -100,3 +100,59 @@ TEST(FaultInjection, F3_MuteBrokerPartialSnapshot_TradingRefused) {
   EXPECT_FALSE(report.trading_allowed());
   ASSERT_EQ(report.mismatches.size(), 2u);
 }
+
+
+TEST(FaultInjection, SingleWriterExclusiveAcrossProcesses) {
+  const auto path = tmp_path("single_writer");
+  const auto lock_path = path + ".lock";
+
+  std::remove(path.c_str());
+  std::remove(lock_path.c_str());
+
+  {
+    auto first = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(first));
+
+    auto& writer = std::get<JournalWriter>(first);
+    ASSERT_FALSE(writer.append({1, "parent-intent"}).has_value());
+
+    const pid_t child = fork();
+    ASSERT_GE(child, 0);
+
+    if (child == 0) {
+      auto second = JournalWriter::open(path);
+      const auto* error = std::get_if<JournalError>(&second);
+
+      const bool refused_by_lock =
+          error != nullptr &&
+          error->kind == JournalErrorKind::IoFailure &&
+          error->detail == "writer lock unavailable";
+
+      _exit(refused_by_lock ? 0 : 1);
+    }
+
+    int status = 0;
+    ASSERT_EQ(waitpid(child, &status, 0), child);
+    ASSERT_TRUE(WIFEXITED(status));
+    EXPECT_EQ(WEXITSTATUS(status), 0)
+        << "Second writer was not explicitly refused by the lock";
+  }
+
+  {
+    // The first writer is destroyed: the lock must be released.
+    auto reopened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(reopened));
+
+    auto& writer = std::get<JournalWriter>(reopened);
+    EXPECT_EQ(writer.next_sequence(), 2u);
+    EXPECT_FALSE(writer.append({2, "after-release"}).has_value());
+
+    const auto recovered = read_journal(path);
+    ASSERT_TRUE(std::holds_alternative<Recovered>(recovered));
+    EXPECT_EQ(std::get<Recovered>(recovered).records.size(), 2u);
+  }
+
+  // Both writers are destroyed before cleanup.
+  std::remove(path.c_str());
+  std::remove(lock_path.c_str());
+}
