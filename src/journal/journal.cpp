@@ -120,11 +120,13 @@ ReadResult parse_journal_bytes(const std::string& bytes) {
 
   for (std::size_t i = 0; i < lines.size(); ++i) {
     const bool is_last = (i + 1 == lines.size());
+    const bool unterminated_last =
+        is_last && !bytes.empty() && bytes.back() != '\n';
     const std::size_t line_no = i + 1;
 
     const auto parsed = parse_line(lines[i]);
     if (!parsed.has_value()) {
-      if (is_last) {
+      if (unterminated_last) {
         out.recovered_truncated_tail = true;
         break;
       }
@@ -135,7 +137,7 @@ ReadResult parse_journal_bytes(const std::string& bytes) {
     const auto computed =
         hash_line(parsed->seq, parsed->prev_hash, parsed->payload);
     if (computed != parsed->record_hash) {
-      if (is_last) {
+      if (unterminated_last) {
         out.recovered_truncated_tail = true;
         break;
       }
@@ -212,10 +214,35 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
       return *heal_err;
     }
   }
-  const int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+  const int fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_APPEND, 0644);
   if (fd < 0) {
     return JournalError{JournalErrorKind::IoFailure, 0, "open append"};
   }
+
+  // A valid final record may lack its newline. Repair the delimiter
+  // before appending, otherwise the next record would be concatenated.
+  const off_t end = ::lseek(fd, 0, SEEK_END);
+  if (end < 0) {
+    ::close(fd);
+    return JournalError{JournalErrorKind::IoFailure, 0, "seek end"};
+  }
+
+  if (end > 0) {
+    char last{};
+    if (::pread(fd, &last, 1, end - 1) != 1) {
+      ::close(fd);
+      return JournalError{JournalErrorKind::IoFailure, 0, "read final byte"};
+    }
+
+    if (last != '\n') {
+      if (::write(fd, "\n", 1) != 1 || ::fsync(fd) != 0) {
+        ::close(fd);
+        return JournalError{JournalErrorKind::IoFailure, 0,
+                            "repair final newline"};
+      }
+    }
+  }
+
   const std::uint64_t next_seq =
       rec.records.empty() ? 1 : rec.records.back().sequence + 1;
   return JournalWriter(path, fd, rec.last_hash, next_seq);

@@ -170,3 +170,74 @@ TEST(Journal, AppendRefusesNonContiguousSequenceAndNewlinePayload) {
   ASSERT_TRUE(e2.has_value());
   EXPECT_EQ(e2->kind, JournalErrorKind::InvalidPayload);
 }
+
+
+TEST(Journal, CompleteCorruptedFinalRecordIsFatal) {
+  TmpFile f;
+  {
+    auto w = open_ok(f.path());
+    append_n(w, 2);
+  }
+
+  auto content = slurp(f.path());
+  const auto pos = content.find("payload-2");
+  ASSERT_NE(pos, std::string::npos);
+
+  content[pos] = 'X';
+
+  // Preserve the final newline: this is a complete,
+  // corrupted record, not an unterminated write.
+  ASSERT_EQ(content.back(), '\n');
+
+  std::ofstream(f.path(), std::ios::trunc | std::ios::binary)
+      << content;
+
+  const auto result = read_journal(f.path());
+
+  ASSERT_TRUE(std::holds_alternative<JournalError>(result))
+      << "A complete corrupted final record must not be "
+         "silently discarded";
+
+  EXPECT_EQ(
+      std::get<JournalError>(result).kind,
+      JournalErrorKind::InteriorCorruption);
+}
+
+
+TEST(Journal, ReopenRepairsMissingFinalNewlineBeforeAppend) {
+  TmpFile f;
+
+  {
+    auto w = open_ok(f.path());
+    append_n(w, 2);
+  }
+
+  auto content = slurp(f.path());
+  ASSERT_FALSE(content.empty());
+  ASSERT_EQ(content.back(), '\n');
+
+  content.pop_back();
+
+  {
+    std::ofstream out(f.path(), std::ios::binary | std::ios::trunc);
+    out << content;
+  }
+
+  {
+    auto w = open_ok(f.path());
+    ASSERT_EQ(w.next_sequence(), 3u);
+    ASSERT_FALSE(w.append({3, "third"}).has_value());
+  }
+
+  const auto result = read_journal(f.path());
+
+  ASSERT_TRUE(std::holds_alternative<Recovered>(result))
+      << "Appending after an unterminated valid record "
+         "must preserve journal integrity";
+
+  const auto& recovered = std::get<Recovered>(result);
+
+  ASSERT_EQ(recovered.records.size(), 3u);
+  EXPECT_EQ(recovered.records[2].sequence, 3u);
+  EXPECT_EQ(recovered.records[2].payload, "third");
+}
