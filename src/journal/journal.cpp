@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <limits>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -83,6 +84,29 @@ std::optional<ParsedLine> parse_line(const std::string& line) {
 
 JournalError io_error(const char* detail) {
   return JournalError{JournalErrorKind::IoFailure, 0, detail};
+}
+
+std::optional<JournalError> sync_parent_directory(
+    const std::string& path) {
+  const auto slash = path.find_last_of('/');
+  const std::string directory =
+      slash == std::string::npos ? "." :
+      slash == 0 ? "/" : path.substr(0, slash);
+
+  const int fd = ::open(directory.c_str(), O_RDONLY);
+  if (fd < 0)
+    return io_error("open journal directory");
+
+  const int sync_result = ::fsync(fd);
+  const int close_result = ::close(fd);
+
+  if (sync_result != 0)
+    return io_error("fsync journal directory");
+
+  if (close_result != 0)
+    return io_error("close journal directory");
+
+  return std::nullopt;
 }
 
 bool same_file(int fd, const std::string& path) {
@@ -263,6 +287,13 @@ ReadResult parse_journal_bytes(const std::string& bytes) {
       return JournalError{JournalErrorKind::ChainBreak, line_no,
                           "prev_hash chain broken"};
     }
+    if (!out.records.empty() &&
+        out.records.back().sequence ==
+            std::numeric_limits<std::uint64_t>::max()) {
+      return JournalError{JournalErrorKind::SequenceViolation, line_no,
+                          "sequence space exhausted"};
+    }
+
     const std::uint64_t expected =
         out.records.empty() ? 1 : out.records.back().sequence + 1;
     if (parsed->seq != expected) {
@@ -387,9 +418,18 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
     }
   } guard{lock_fd};
 
-  const int flags = O_RDWR | O_CREAT | O_APPEND | O_NOFOLLOW;
+  const int existing_flags = O_RDWR | O_APPEND | O_NOFOLLOW;
+  const int create_flags = existing_flags | O_CREAT | O_EXCL;
 
-  int fd = ::open(path.c_str(), flags, 0644);
+  bool created = false;
+  int fd = ::open(path.c_str(), create_flags, 0644);
+
+  if (fd >= 0) {
+    created = true;
+  } else if (errno == EEXIST) {
+    fd = ::open(path.c_str(), existing_flags);
+  }
+
   if (fd < 0)
     return io_error("open journal");
 
@@ -401,6 +441,13 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
 
   if (!same_file(fd, path))
     return close_and_fail("journal path identity changed");
+
+  if (created) {
+    if (auto error = sync_parent_directory(path)) {
+      ::close(fd);
+      return *error;
+    }
+  }
 
   auto snapshot = read_from_fd(fd);
 
@@ -437,7 +484,7 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
     if (error)
       return *error;
 
-    fd = ::open(path.c_str(), flags, 0644);
+    fd = ::open(path.c_str(), existing_flags);
     if (fd < 0)
       return io_error("reopen recovered journal");
 
@@ -493,6 +540,12 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
   if (!same_file(fd, path))
     return close_and_fail("journal changed before writer activation");
 
+  if (!recovered.records.empty() &&
+      recovered.records.back().sequence ==
+          std::numeric_limits<std::uint64_t>::max()) {
+    return close_and_fail("sequence space exhausted");
+  }
+
   const std::uint64_t next_seq =
       recovered.records.empty()
           ? 1
@@ -526,6 +579,12 @@ std::optional<JournalError> JournalWriter::append(const Record& record) {
     return JournalError{JournalErrorKind::InvalidPayload, 0,
                         "payload contains newline"};
   }
+  if (next_seq_ == 0 ||
+      next_seq_ == std::numeric_limits<std::uint64_t>::max()) {
+    return JournalError{JournalErrorKind::SequenceViolation, 0,
+                        "sequence space exhausted"};
+  }
+
   if (record.sequence != next_seq_) {
     return JournalError{JournalErrorKind::SequenceViolation, 0,
                         "append sequence must be contiguous"};

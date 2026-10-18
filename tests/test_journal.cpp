@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <fstream>
+#include <limits>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string>
@@ -59,6 +60,64 @@ TEST(Sha256, FipsVectors) {
   EXPECT_EQ(ej::sha256::hex_digest(
                 "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
             "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
+}
+
+
+TEST(Journal, ExclusiveCreationAndReopenPreservesRecords) {
+  TmpFile f;
+
+  struct stat before{};
+  ASSERT_NE(::stat(f.path().c_str(), &before), 0);
+
+  {
+    auto w = open_ok(f.path());
+
+    struct stat created{};
+    ASSERT_EQ(::stat(f.path().c_str(), &created), 0);
+    ASSERT_TRUE(S_ISREG(created.st_mode));
+
+    ASSERT_FALSE(w.append({1, "first"}).has_value());
+  }
+
+  {
+    auto w = open_ok(f.path());
+    ASSERT_EQ(w.next_sequence(), 2u);
+    ASSERT_FALSE(w.append({2, "second"}).has_value());
+  }
+
+  const auto result = read_journal(f.path());
+
+  ASSERT_TRUE(std::holds_alternative<Recovered>(result));
+  const auto& recovered = std::get<Recovered>(result);
+
+  ASSERT_EQ(recovered.records.size(), 2u);
+  EXPECT_EQ(recovered.records[0].payload, "first");
+  EXPECT_EQ(recovered.records[1].payload, "second");
+  EXPECT_FALSE(recovered.recovered_truncated_tail);
+}
+
+TEST(Journal, SequenceOverflowIsRejected) {
+  TmpFile f;
+  auto w = open_ok(f.path());
+
+  // An invalid sequence must not mutate the journal.
+  const auto error = w.append({
+      std::numeric_limits<std::uint64_t>::max(),
+      "overflow"
+  });
+
+  ASSERT_TRUE(error.has_value());
+  EXPECT_EQ(error->kind, JournalErrorKind::SequenceViolation);
+
+  EXPECT_EQ(w.next_sequence(), 1u);
+  EXPECT_TRUE(slurp(f.path()).empty());
+
+  // The writer must remain usable after rejecting invalid input.
+  ASSERT_FALSE(w.append({1, "valid"}).has_value());
+
+  const auto result = read_journal(f.path());
+  ASSERT_TRUE(std::holds_alternative<Recovered>(result));
+  ASSERT_EQ(std::get<Recovered>(result).records.size(), 1u);
 }
 
 TEST(Journal, RoundTrip) {
