@@ -7,3 +7,12 @@ third_party/twsapi/
 third_party/twsapi.zip
 third_party/IntelRDFPMathLib20U2/
 third_party/intel_rdfp.tar.gz
+
+# Generated ThreadSanitizer build artifacts
+build-tsan/
+
+# Local reproducible builds
+build-public/
+
+# Generated CMake build directories
+build-*/

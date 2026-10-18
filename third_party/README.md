@@ -1,6 +1,8 @@
 # Third-party dependencies (not vendored)
 
-## IBKR TWS API (required for the M6 broker adapter)
+These dependencies are not needed for the default offline core build (`EJ_WITH_IBKR=OFF`).
+
+## IBKR TWS API (optional adapter only)
 
 The TWS API is licensed by Interactive Brokers and may NOT be
 redistributed with this repository. To build:
@@ -9,7 +11,7 @@ redistributed with this repository. To build:
    https://interactivebrokers.github.io/
 2. Unzip into `third_party/twsapi/` so that
    `third_party/twsapi/IBJts/source/cppclient/client/` exists
-3. Build as usual (`cmake .. && make`)
+3. Configure with `cmake -S . -B build-ibkr -DEJ_WITH_IBKR=ON`, then build with `cmake --build build-ibkr`.
 
 Version used during development: 10.30.01.
 

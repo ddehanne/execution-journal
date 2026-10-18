@@ -66,7 +66,7 @@ inline std::array<std::uint8_t, 32> digest(const std::uint8_t* data,
     h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
   }
   std::array<std::uint8_t, 32> out{};
-  for (int i = 0; i < 8; ++i) {
+  for (std::size_t i = 0; i < 8; ++i) {
     out[4 * i] = static_cast<std::uint8_t>(h[i] >> 24);
     out[4 * i + 1] = static_cast<std::uint8_t>(h[i] >> 16);
     out[4 * i + 2] = static_cast<std::uint8_t>(h[i] >> 8);
@@ -79,7 +79,7 @@ inline std::string hex_digest(const std::string& s) {
   const auto d = digest(reinterpret_cast<const std::uint8_t*>(s.data()), s.size());
   static constexpr char hx[] = "0123456789abcdef";
   std::string out(64, '0');
-  for (int i = 0; i < 32; ++i) {
+  for (std::size_t i = 0; i < 32; ++i) {
     out[2 * i] = hx[d[i] >> 4];
     out[2 * i + 1] = hx[d[i] & 0xF];
   }

@@ -3,17 +3,25 @@
 C++20 execution integrity engine — order lifecycle, durable journaling,
 crash recovery, and broker reconciliation for systematic trading systems.
 
-**Status: v0.1.** All 7 modules complete. The IBKR adapter has been
-exercised against a live paper gateway (read-only snapshot): session
-establishment, position/order retrieval under ASan+UBSan, and clean
-teardown — with positions cross-validated symbol-by-symbol against an
-independent ledger implementation.
+**Status: v0.1 — offline core reproducible.**
+
+**Verified locally (2026-10-18): 32/32 tests passed** on Apple Silicon
+with Apple Clang 21 and CMake 4.4.4, without the proprietary IBKR SDK.
+
+The test suite exercises order-state anomalies, journal corruption,
+risk controls, broker reconciliation, and fault injection, including
+a real SIGKILL during journal writes.
+
+The optional IBKR adapter was reportedly exercised during earlier
+development against an IBKR paper gateway (read-only snapshot).
+That integration, and the historical sanitizer results, were not
+revalidated in the current verification session.
 
 Companion to [verified-ledger](https://github.com/ddehanne/verified-ledger)
-(Rust): the same correctness contract, carried from formal verification
-into live-execution engineering. Where the Rust project proves the model
-(Kani, Miri, fuzzing), this project confronts it with sockets, fsync,
-threads, and a real broker API.
+(Rust): a related correctness-oriented design, adapted for C++ execution
+engineering. This repository addresses order state, durability,
+reconciliation, and broker integration; verification evidence for
+each repository must be assessed independently.
 
 ## Design laws (inherited from the Rust contract, adapted for execution)
 
@@ -58,7 +66,8 @@ src/cli/        ej-audit verify|status|replay (exit 0/2/1)
 
 ## Verification
 
-- Full test suite under **ASan+UBSan** (default build flags); strict
+- Historical ASan+UBSan test run (not reproduced in the current session);
+  strict
   warnings (`-Wall -Wextra -Wpedantic -Wconversion -Wshadow`) on our
   code, third-party isolated
 - SHA-256 validated against FIPS 180-4 test vectors
@@ -70,13 +79,38 @@ src/cli/        ej-audit verify|status|replay (exit 0/2/1)
   (reopen heals), crash between durability barrier and dispatch (intent
   recovered as eligible-never-dispatched — no blind-resubmission path),
   mute-broker partial snapshot (trading refused by composition)
-- TSan build: full suite, zero data races
-- One-command health: `./check.sh` (build + ctest + CLI smoke)
+- Historical TSan report: full suite, zero data races reported; not independently reproduced
+- One-command offline verification: `./check.sh` (configure + build + ctest; no CLI smoke test)
 
-## Build
+## Build and reproduce
 
-Requires the IBKR TWS API (not vendored — see `third_party/README.md`).
-mkdir -p build && cd build && cmake .. && make -j2 && ctest
+The C++20 core, audit CLI, and tests build without the IBKR SDK.
+Requires a C++20 compiler, CMake >= 3.22, and network access
+to download GoogleTest.
+
+### Offline build
+
+    cmake -S . -B build-public -DEJ_WITH_IBKR=OFF -DSANITIZE=OFF
+    cmake --build build-public --parallel 4
+    ctest --test-dir build-public --output-on-failure
+
+Alternatively, run `./check.sh`.
+
+**Locally reproduced (October 18, 2026):** 32/32 tests passed
+on Apple Silicon with Apple Clang 21 and CMake 4.4.4,
+without IBKR or sanitizers.
+
+The offline tests do not establish production safety or validate
+the real broker adapter. Historical ASan/UBSan, ThreadSanitizer,
+and paper-gateway results were not reproduced in this session.
+
+### Optional IBKR adapter
+
+Configure with `-DEJ_WITH_IBKR=ON` after obtaining the licensed
+dependencies described in `third_party/README.md`.
+
+The optional IBKR build remains unverified in this session.
+
 ## Roadmap beyond v0.1
 
 - Broker-disconnect-mid-session fault scenario
