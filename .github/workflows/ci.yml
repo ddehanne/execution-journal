@@ -1,0 +1,21 @@
+name: C++ Core CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  offline-core:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build-public -DEJ_WITH_IBKR=OFF -DSANITIZE=OFF
+
+      - name: Build
+        run: cmake --build build-public --parallel 2
+
+      - name: Test
+        run: ctest --test-dir build-public --output-on-failure

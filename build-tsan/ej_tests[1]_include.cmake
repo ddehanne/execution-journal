@@ -1,5 +1,0 @@
-if(EXISTS "/root/execution-journal/build-tsan/ej_tests[1]_tests.cmake")
-  include("/root/execution-journal/build-tsan/ej_tests[1]_tests.cmake")
-else()
-  add_test(ej_tests_NOT_BUILT ej_tests_NOT_BUILT)
-endif()

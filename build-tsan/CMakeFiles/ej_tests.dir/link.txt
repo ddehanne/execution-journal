@@ -1,1 +1,0 @@
-/usr/bin/c++ -fsanitize=thread -g CMakeFiles/ej_tests.dir/tests/test_types.cpp.o CMakeFiles/ej_tests.dir/tests/test_lifecycle.cpp.o CMakeFiles/ej_tests.dir/tests/test_journal.cpp.o CMakeFiles/ej_tests.dir/tests/test_risk.cpp.o CMakeFiles/ej_tests.dir/tests/test_recovery.cpp.o -o ej_tests  libej_core.a lib/libgtest_main.a libibkr_client.a lib/libgtest.a 
