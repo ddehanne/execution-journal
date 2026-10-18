@@ -10,11 +10,35 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include "journal/sha256.hpp"
 
 namespace ej::journal {
+
+#ifdef EJ_JOURNAL_TEST_FAULTS
+bool journal_test_fail_fsync = false;
+
+int journal_test_fsync(int fd) {
+  if (journal_test_fail_fsync) {
+    errno = EIO;
+    return -1;
+  }
+  return ::fsync(fd);
+}
+#endif
+
 namespace {
+
+// Production implementation always invokes the real system call.
+// Test builds may provide a separate implementation.
+int journal_fsync(int fd) {
+#ifdef EJ_JOURNAL_TEST_FAULTS
+  return journal_test_fsync(fd);
+#else
+  return ::fsync(fd);
+#endif
+}
 
 std::string hash_line(std::uint64_t seq, const std::string& prev_hash,
                       const std::string& payload) {
@@ -56,45 +80,134 @@ std::optional<ParsedLine> parse_line(const std::string& line) {
   return out;
 }
 
-std::optional<JournalError> heal_to_prefix(const std::string& path,
-                                           std::size_t keep_lines) {
-  std::ifstream in(path);
-  if (!in) {
-    return JournalError{JournalErrorKind::IoFailure, 0, "open for heal"};
-  }
-  std::ostringstream kept;
-  std::string line;
-  for (std::size_t i = 0; i < keep_lines && std::getline(in, line); ++i) {
-    kept << line << '\n';
-  }
-  in.close();
 
-  const std::string tmp = path + ".tmp_recover";
-  {
-    const int fd = ::open(tmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd < 0) {
-      return JournalError{JournalErrorKind::IoFailure, 0, "create tmp"};
+JournalError io_error(const char* detail) {
+  return JournalError{JournalErrorKind::IoFailure, 0, detail};
+}
+
+bool same_file(int fd, const std::string& path) {
+  struct stat a{};
+  struct stat b{};
+  return ::fstat(fd, &a) == 0 &&
+         ::stat(path.c_str(), &b) == 0 &&
+         S_ISREG(a.st_mode) &&
+         S_ISREG(b.st_mode) &&
+         a.st_dev == b.st_dev &&
+         a.st_ino == b.st_ino;
+}
+
+std::variant<std::string, JournalError> read_from_fd(int fd) {
+  struct stat st{};
+  if (::fstat(fd, &st) != 0 || !S_ISREG(st.st_mode))
+    return io_error("journal is not a regular file");
+
+  std::string bytes;
+  char buffer[8192];
+  off_t offset = 0;
+
+  for (;;) {
+    const ssize_t n = ::pread(fd, buffer, sizeof(buffer), offset);
+    if (n > 0) {
+      bytes.append(buffer, static_cast<std::size_t>(n));
+      offset += static_cast<off_t>(n);
+    } else if (n == 0) {
+      return bytes;
+    } else if (errno != EINTR) {
+      return io_error("read journal");
     }
-    const std::string data = kept.str();
-    std::size_t written = 0;
-    while (written < data.size()) {
-      const ssize_t n =
-          ::write(fd, data.data() + written, data.size() - written);
-      if (n < 0) {
-        ::close(fd);
-        return JournalError{JournalErrorKind::IoFailure, 0, "write tmp"};
-      }
-      written += static_cast<std::size_t>(n);
-    }
-    if (::fsync(fd) != 0) {
-      ::close(fd);
-      return JournalError{JournalErrorKind::IoFailure, 0, "fsync tmp"};
-    }
-    ::close(fd);
   }
-  if (std::rename(tmp.c_str(), path.c_str()) != 0) {
-    return JournalError{JournalErrorKind::IoFailure, 0, "rename tmp"};
+}
+
+std::optional<JournalError> heal_to_prefix(
+    const std::string& path,
+    int original_fd,
+    const std::string& validated_bytes,
+    std::size_t keep_lines,
+    mode_t original_mode) {
+
+  std::size_t end = 0;
+
+  for (std::size_t i = 0; i < keep_lines; ++i) {
+    const auto newline = validated_bytes.find('\n', end);
+    if (newline == std::string::npos)
+      return io_error("validated prefix incomplete");
+    end = newline + 1;
   }
+
+  const std::string data = validated_bytes.substr(0, end);
+
+  std::string pattern = path + ".tmp_recover.XXXXXX";
+  std::vector<char> name(pattern.begin(), pattern.end());
+  name.push_back('\0');
+
+  const int tmp_fd = ::mkstemp(name.data());
+  if (tmp_fd < 0)
+    return io_error("create recovery tmp");
+
+  const std::string tmp_path(name.data());
+
+  auto fail = [&](const char* detail)
+      -> std::optional<JournalError> {
+    ::close(tmp_fd);
+    ::unlink(tmp_path.c_str());
+    return io_error(detail);
+  };
+
+  if (::fchmod(tmp_fd, original_mode & 07777) != 0)
+    return fail("chmod recovery tmp");
+
+  std::size_t written = 0;
+
+  while (written < data.size()) {
+    const ssize_t n = ::write(
+        tmp_fd, data.data() + written, data.size() - written);
+
+    if (n < 0 && errno == EINTR)
+      continue;
+
+    if (n <= 0)
+      return fail("write recovery tmp");
+
+    written += static_cast<std::size_t>(n);
+  }
+
+  if (::fsync(tmp_fd) != 0)
+    return fail("fsync recovery tmp");
+
+  if (::close(tmp_fd) != 0) {
+    ::unlink(tmp_path.c_str());
+    return io_error("close recovery tmp");
+  }
+
+  // Refuse to replace a path that no longer names the validated inode.
+  if (!same_file(original_fd, path)) {
+    ::unlink(tmp_path.c_str());
+    return io_error("journal changed before recovery rename");
+  }
+
+  if (::rename(tmp_path.c_str(), path.c_str()) != 0) {
+    ::unlink(tmp_path.c_str());
+    return io_error("rename recovery tmp");
+  }
+
+  const auto slash = path.find_last_of('/');
+  const std::string directory =
+      slash == std::string::npos ? "." :
+      slash == 0 ? "/" : path.substr(0, slash);
+
+  const int dir_fd = ::open(directory.c_str(), O_RDONLY);
+  if (dir_fd < 0)
+    return io_error("open recovery directory");
+
+  const int sync_result = ::fsync(dir_fd);
+  const int close_result = ::close(dir_fd);
+
+  if (sync_result != 0)
+    return io_error("fsync recovery directory");
+
+  if (close_result != 0)
+    return io_error("close recovery directory");
+
   return std::nullopt;
 }
 
@@ -254,73 +367,160 @@ JournalWriter::~JournalWriter() {
 
 std::variant<JournalWriter, JournalError> JournalWriter::open(
     const std::string& path) {
+
   const std::string lock_path = path + ".lock";
-  const int lock_fd = ::open(lock_path.c_str(), O_RDWR | O_CREAT, 0644);
-  if (lock_fd < 0) {
-    return JournalError{JournalErrorKind::IoFailure, 0, "open lock"};
-  }
+  const int lock_fd =
+      ::open(lock_path.c_str(), O_RDWR | O_CREAT, 0644);
+
+  if (lock_fd < 0)
+    return io_error("open lock");
 
   if (::flock(lock_fd, LOCK_EX | LOCK_NB) != 0) {
     ::close(lock_fd);
-    return JournalError{JournalErrorKind::IoFailure, 0,
-                        "writer lock unavailable"};
+    return io_error("writer lock unavailable");
   }
 
-  // Own the lock through every early-return path until ownership
-  // transfers to JournalWriter.
   struct LockGuard {
     int fd;
-    ~LockGuard() { if (fd >= 0) ::close(fd); }
+    ~LockGuard() {
+      if (fd >= 0) ::close(fd);
+    }
   } guard{lock_fd};
 
-  auto read = read_journal(path);
-  if (const auto* err = std::get_if<JournalError>(&read)) {
-    return *err;
-  }
-  auto& rec = std::get<Recovered>(read);
-  if (rec.recovered_truncated_tail) {
-    if (auto heal_err = heal_to_prefix(path, rec.records.size())) {
-      return *heal_err;
-    }
-  }
-  const int fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_APPEND, 0644);
-  if (fd < 0) {
-    return JournalError{JournalErrorKind::IoFailure, 0, "open append"};
+  const int flags = O_RDWR | O_CREAT | O_APPEND | O_NOFOLLOW;
+
+  int fd = ::open(path.c_str(), flags, 0644);
+  if (fd < 0)
+    return io_error("open journal");
+
+  auto close_and_fail = [&](const char* detail)
+      -> std::variant<JournalWriter, JournalError> {
+    ::close(fd);
+    return io_error(detail);
+  };
+
+  if (!same_file(fd, path))
+    return close_and_fail("journal path identity changed");
+
+  auto snapshot = read_from_fd(fd);
+
+  if (const auto* error = std::get_if<JournalError>(&snapshot)) {
+    ::close(fd);
+    return *error;
   }
 
-  // A valid final record may lack its newline. Repair the delimiter
-  // before appending, otherwise the next record would be concatenated.
-  const off_t end = ::lseek(fd, 0, SEEK_END);
-  if (end < 0) {
+  const std::string& bytes = std::get<std::string>(snapshot);
+  auto parsed = parse_journal_bytes(bytes);
+
+  if (const auto* error = std::get_if<JournalError>(&parsed)) {
     ::close(fd);
-    return JournalError{JournalErrorKind::IoFailure, 0, "seek end"};
+    return *error;
   }
+
+  Recovered recovered = std::get<Recovered>(std::move(parsed));
+
+  if (!same_file(fd, path))
+    return close_and_fail("journal changed during validation");
+
+  if (recovered.recovered_truncated_tail) {
+    struct stat st{};
+
+    if (::fstat(fd, &st) != 0)
+      return close_and_fail("stat before recovery");
+
+    const auto error = heal_to_prefix(
+        path, fd, bytes, recovered.records.size(), st.st_mode);
+
+    ::close(fd);
+    fd = -1;
+
+    if (error)
+      return *error;
+
+    fd = ::open(path.c_str(), flags, 0644);
+    if (fd < 0)
+      return io_error("reopen recovered journal");
+
+    if (!same_file(fd, path))
+      return close_and_fail("recovered journal identity changed");
+
+    auto verification = read_from_fd(fd);
+
+    if (const auto* e = std::get_if<JournalError>(&verification)) {
+      ::close(fd);
+      return *e;
+    }
+
+    auto verified = parse_journal_bytes(
+        std::get<std::string>(verification));
+
+    if (const auto* e = std::get_if<JournalError>(&verified)) {
+      ::close(fd);
+      return *e;
+    }
+
+    const auto& after = std::get<Recovered>(verified);
+
+    if (after.recovered_truncated_tail ||
+        after.records.size() != recovered.records.size() ||
+        after.last_hash != recovered.last_hash)
+      return close_and_fail("recovery verification mismatch");
+
+    if (!same_file(fd, path))
+      return close_and_fail("journal changed after recovery");
+  }
+
+  const off_t end = ::lseek(fd, 0, SEEK_END);
+
+  if (end < 0)
+    return close_and_fail("seek end");
 
   if (end > 0) {
     char last{};
-    if (::pread(fd, &last, 1, end - 1) != 1) {
-      ::close(fd);
-      return JournalError{JournalErrorKind::IoFailure, 0, "read final byte"};
-    }
+
+    if (::pread(fd, &last, 1, end - 1) != 1)
+      return close_and_fail("read final byte");
 
     if (last != '\n') {
-      if (::write(fd, "\n", 1) != 1 || ::fsync(fd) != 0) {
-        ::close(fd);
-        return JournalError{JournalErrorKind::IoFailure, 0,
-                            "repair final newline"};
-      }
+      if (!same_file(fd, path))
+        return close_and_fail("journal changed before newline repair");
+
+      if (::write(fd, "\n", 1) != 1 || ::fsync(fd) != 0)
+        return close_and_fail("repair final newline");
     }
   }
 
+  if (!same_file(fd, path))
+    return close_and_fail("journal changed before writer activation");
+
   const std::uint64_t next_seq =
-      rec.records.empty() ? 1 : rec.records.back().sequence + 1;
+      recovered.records.empty()
+          ? 1
+          : recovered.records.back().sequence + 1;
+
   guard.fd = -1;
-  return JournalWriter(path, fd, lock_fd, rec.last_hash, next_seq);
+
+  return JournalWriter(
+      path, fd, lock_fd, recovered.last_hash, next_seq);
 }
 
 std::optional<JournalError> JournalWriter::append(const Record& record) {
   if (poisoned_) {
     return JournalError{JournalErrorKind::IoFailure, 0, "writer poisoned"};
+  }
+
+  struct stat fd_stat{};
+  struct stat path_stat{};
+
+  if (::fstat(fd_, &fd_stat) != 0 ||
+      ::stat(path_.c_str(), &path_stat) != 0 ||
+      !S_ISREG(fd_stat.st_mode) ||
+      !S_ISREG(path_stat.st_mode) ||
+      fd_stat.st_dev != path_stat.st_dev ||
+      fd_stat.st_ino != path_stat.st_ino) {
+    poisoned_ = true;
+    return JournalError{JournalErrorKind::IoFailure, 0,
+                        "journal path identity changed"};
   }
   if (record.payload.find('\n') != std::string::npos) {
     return JournalError{JournalErrorKind::InvalidPayload, 0,
@@ -348,7 +548,7 @@ std::optional<JournalError> JournalWriter::append(const Record& record) {
     written += static_cast<std::size_t>(n);
   }
   // Durability barrier — success past this point IS dispatch eligibility.
-  if (::fsync(fd_) != 0) {
+  if (journal_fsync(fd_) != 0) {
     poisoned_ = true;
     return JournalError{JournalErrorKind::IoFailure, 0, "fsync"};
   }

@@ -73,7 +73,14 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_executable(ej_tests tests/test_types.cpp tests/test_lifecycle.cpp tests/test_journal.cpp tests/test_risk.cpp tests/test_recovery.cpp tests/test_fault_injection.cpp)
-target_link_libraries(ej_tests PRIVATE ej_core gtest_main)
+# Test-only core: same sources, isolated fault-injection build.
+get_target_property(EJ_CORE_SOURCES ej_core SOURCES)
+
+add_library(ej_core_test STATIC ${EJ_CORE_SOURCES})
+target_include_directories(ej_core_test PUBLIC src)
+target_compile_definitions(ej_core_test PRIVATE EJ_JOURNAL_TEST_FAULTS)
+
+target_link_libraries(ej_tests PRIVATE ej_core_test gtest_main)
 include(GoogleTest)
 gtest_discover_tests(ej_tests)
 

@@ -17,6 +17,10 @@
 
 #include "broker/broker_port.hpp"
 #include "journal/journal.hpp"
+
+namespace ej::journal {
+extern bool journal_test_fail_fsync;
+}
 #include "recovery/reconcile.hpp"
 
 using namespace ej::journal;
@@ -294,19 +298,12 @@ TEST(FaultInjection, WriterPoisonedAfterFsyncFailure) {
 
     auto& writer = std::get<JournalWriter>(opened);
 
-    const int journal_fd = journal_fd_for(path);
-    ASSERT_GE(journal_fd, 0);
-
-    int pipe_fds[2]{};
-    ASSERT_EQ(::pipe(pipe_fds), 0);
-
-    ASSERT_EQ(::dup2(pipe_fds[1], journal_fd), journal_fd);
-
-    if (pipe_fds[1] != journal_fd) {
-      ASSERT_EQ(::close(pipe_fds[1]), 0);
-    }
+    ej::journal::journal_test_fail_fsync = true;
 
     const auto first = writer.append({1, "durability-test"});
+
+    ej::journal::journal_test_fail_fsync = false;
+
     ASSERT_TRUE(first.has_value());
     EXPECT_EQ(first->kind, JournalErrorKind::IoFailure);
     EXPECT_EQ(first->detail, "fsync");
@@ -315,10 +312,58 @@ TEST(FaultInjection, WriterPoisonedAfterFsyncFailure) {
     ASSERT_TRUE(second.has_value());
     EXPECT_EQ(second->kind, JournalErrorKind::IoFailure);
     EXPECT_EQ(second->detail, "writer poisoned");
-
-    ASSERT_EQ(::close(pipe_fds[0]), 0);
   }
 
   std::remove(path.c_str());
   std::remove((path + ".lock").c_str());
+}
+
+TEST(FaultInjection, WriterRejectsReplacedJournalPath) {
+  const auto path = tmp_path("replaced_journal");
+  const auto displaced = path + ".displaced";
+  const auto lock_path = path + ".lock";
+
+  std::remove(path.c_str());
+  std::remove(displaced.c_str());
+  std::remove(lock_path.c_str());
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+
+    auto& writer = std::get<JournalWriter>(opened);
+    ASSERT_FALSE(writer.append({1, "original"}).has_value());
+
+    // The writer retains an fd to the original inode.
+    ASSERT_EQ(::rename(path.c_str(), displaced.c_str()), 0);
+
+    // A different file now occupies the authoritative path.
+    {
+      const int fd = ::open(path.c_str(),
+                            O_WRONLY | O_CREAT | O_EXCL, 0644);
+      ASSERT_GE(fd, 0);
+      ASSERT_EQ(::close(fd), 0);
+    }
+
+    const auto result = writer.append({2, "must-not-succeed"});
+
+    ASSERT_TRUE(result.has_value())
+        << "Writer acknowledged durability on a displaced inode";
+
+    EXPECT_EQ(result->kind, JournalErrorKind::IoFailure);
+
+    // Restore the original inode at the authoritative path.
+    ASSERT_EQ(::remove(path.c_str()), 0);
+    ASSERT_EQ(::rename(displaced.c_str(), path.c_str()), 0);
+
+    // Recovery of the path must not unpoison this writer.
+    const auto retry = writer.append({2, "retry"});
+    ASSERT_TRUE(retry.has_value());
+    EXPECT_EQ(retry->kind, JournalErrorKind::IoFailure);
+    EXPECT_EQ(retry->detail, "writer poisoned");
+  }
+
+  std::remove(path.c_str());
+  std::remove(displaced.c_str());
+  std::remove(lock_path.c_str());
 }
