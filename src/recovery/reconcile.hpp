@@ -37,9 +37,10 @@ struct Mismatch {
 };
 
 struct ReconcileReport {
+  bool broker_snapshot_complete = false;
   std::vector<Mismatch> mismatches;
   [[nodiscard]] bool trading_allowed() const noexcept {
-    return mismatches.empty();
+    return broker_snapshot_complete && mismatches.empty();
   }
 };
 

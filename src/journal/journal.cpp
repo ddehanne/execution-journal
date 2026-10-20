@@ -109,6 +109,98 @@ std::optional<JournalError> sync_parent_directory(
   return std::nullopt;
 }
 
+
+// Persist quarantine before a recovery operation can erase evidence.
+// The marker is never automatically removed.
+std::optional<JournalError> persist_recovery_quarantine(
+    const std::string& journal_path) {
+
+  const std::string marker =
+      journal_path + ".recovery_quarantine";
+
+  const int fd = ::open(
+      marker.c_str(),
+      O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW,
+      0600);
+
+  if (fd < 0) {
+    if (errno == EEXIST) {
+      struct stat st{};
+      if (::lstat(marker.c_str(), &st) != 0 ||
+          !S_ISREG(st.st_mode)) {
+        return io_error("invalid recovery quarantine marker");
+      }
+
+      const int existing_fd =
+          ::open(marker.c_str(), O_RDONLY | O_NOFOLLOW);
+
+      if (existing_fd < 0)
+        return io_error("open existing recovery quarantine marker");
+
+      constexpr char expected[] =
+          "QS1_RECOVERY_QUARANTINE_V1\n";
+
+      char actual[sizeof(expected)]{};
+
+      const ssize_t n =
+          ::read(existing_fd, actual, sizeof(actual));
+
+      const int close_result = ::close(existing_fd);
+
+      if (n != static_cast<ssize_t>(sizeof(expected) - 1) ||
+          close_result != 0 ||
+          std::memcmp(actual, expected, sizeof(expected) - 1) != 0) {
+        return io_error("invalid recovery quarantine content");
+      }
+
+      return sync_parent_directory(marker);
+    }
+    return io_error("create recovery quarantine marker");
+  }
+
+  constexpr char evidence[] =
+      "QS1_RECOVERY_QUARANTINE_V1\n";
+
+  const ssize_t written =
+      ::write(fd, evidence, sizeof(evidence) - 1);
+
+  if (written != static_cast<ssize_t>(sizeof(evidence) - 1)) {
+    ::close(fd);
+    return io_error("write recovery quarantine marker");
+  }
+
+  if (::fsync(fd) != 0) {
+    ::close(fd);
+    return io_error("fsync recovery quarantine marker");
+  }
+
+  if (::close(fd) != 0)
+    return io_error("close recovery quarantine marker");
+
+  return sync_parent_directory(marker);
+}
+
+// Fail closed if the marker cannot be inspected reliably.
+std::variant<bool, JournalError> recovery_quarantine_present(
+    const std::string& journal_path) {
+
+  const std::string marker =
+      journal_path + ".recovery_quarantine";
+
+  struct stat st{};
+
+  if (::lstat(marker.c_str(), &st) == 0) {
+    if (!S_ISREG(st.st_mode))
+      return io_error("invalid recovery quarantine marker");
+    return true;
+  }
+
+  if (errno == ENOENT)
+    return false;
+
+  return io_error("inspect recovery quarantine marker");
+}
+
 bool same_file(int fd, const std::string& path) {
   struct stat a{};
   struct stat b{};
@@ -357,10 +449,12 @@ ReadResult read_journal(const std::string& path) {
 
 JournalWriter::JournalWriter(std::string path, int fd, int lock_fd,
                              std::string last_hash,
-                             std::uint64_t next_seq) noexcept
+                             std::uint64_t next_seq,
+                             bool recovery_repaired) noexcept
     : path_(std::move(path)),
       fd_(fd),
       lock_fd_(lock_fd),
+      recovery_repaired_(recovery_repaired),
       last_hash_(std::move(last_hash)),
       next_seq_(next_seq) {}
 
@@ -369,6 +463,7 @@ JournalWriter::JournalWriter(JournalWriter&& o) noexcept
       fd_(o.fd_),
       lock_fd_(o.lock_fd_),
       poisoned_(o.poisoned_),
+      recovery_repaired_(o.recovery_repaired_),
       last_hash_(std::move(o.last_hash_)),
       next_seq_(o.next_seq_) {
   o.fd_ = -1;
@@ -383,6 +478,7 @@ JournalWriter& JournalWriter::operator=(JournalWriter&& o) noexcept {
     fd_ = o.fd_;
     lock_fd_ = o.lock_fd_;
     poisoned_ = o.poisoned_;
+    recovery_repaired_ = o.recovery_repaired_;
     last_hash_ = std::move(o.last_hash_);
     next_seq_ = o.next_seq_;
     o.fd_ = -1;
@@ -485,7 +581,12 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
   if (!same_file(fd, path))
     return close_and_fail("journal changed during validation");
 
+  bool recovery_repaired = recovered.recovered_truncated_tail;
+
   if (recovered.recovered_truncated_tail) {
+    if (auto error = persist_recovery_quarantine(path))
+      return close_and_fail(error->detail.c_str());
+
     struct stat st{};
 
     if (::fstat(fd, &st) != 0)
@@ -545,6 +646,10 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
       return close_and_fail("read final byte");
 
     if (last != '\n') {
+      if (auto error = persist_recovery_quarantine(path))
+        return close_and_fail(error->detail.c_str());
+
+      recovery_repaired = true;
       if (!same_file(fd, path))
         return close_and_fail("journal changed before newline repair");
 
@@ -567,10 +672,17 @@ std::variant<JournalWriter, JournalError> JournalWriter::open(
           ? 1
           : recovered.records.back().sequence + 1;
 
+  auto quarantine = recovery_quarantine_present(path);
+  if (auto* error = std::get_if<JournalError>(&quarantine))
+    return close_and_fail(error->detail.c_str());
+
+  const bool quarantined = std::get<bool>(quarantine);
+
   guard.fd = -1;
 
   return JournalWriter(
-      path, fd, lock_fd, recovered.last_hash, next_seq);
+      path, fd, lock_fd, recovered.last_hash, next_seq,
+      recovery_repaired || quarantined);
 }
 
 std::optional<JournalError> JournalWriter::append(const Record& record) {

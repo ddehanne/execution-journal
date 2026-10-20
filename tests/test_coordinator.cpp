@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdio>
+#include <fstream>
 #include <string>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -261,4 +262,47 @@ TEST(Coordinator, DurableDecisionBlocksDuplicateAfterCrash) {
   EXPECT_EQ(
       std::get<journal::Recovered>(recovered).records.size(),
       1U);
+}
+
+
+TEST(Coordinator, RejectsRepairedJournalBeforeResuming) {
+  Paths paths("repaired_journal");
+
+  // Persist a legitimate approved decision.
+  {
+    auto coordinator = open_coordinator(paths);
+
+    const auto decision =
+        coordinator.evaluate(order("ord-durable"), 0);
+
+    ASSERT_TRUE(std::holds_alternative<Approved>(decision));
+  }
+
+  // Simulate an interrupted final journal record.
+  {
+    std::ofstream out(
+        paths.journal,
+        std::ios::binary | std::ios::app);
+
+    ASSERT_TRUE(out.is_open());
+
+    out << "2|incomplete-record";
+    out.flush();
+
+    ASSERT_TRUE(out.good());
+  }
+
+  // JournalWriter may repair the torn tail, but the
+  // Coordinator must refuse to resume silently.
+  auto result = Coordinator::open(
+      paths.journal,
+      paths.latch,
+      config());
+
+  ASSERT_TRUE(
+      std::holds_alternative<journal::JournalError>(result));
+
+  EXPECT_EQ(
+      std::get<journal::JournalError>(result).kind,
+      journal::JournalErrorKind::InteriorCorruption);
 }

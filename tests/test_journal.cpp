@@ -149,6 +149,7 @@ TEST(Journal, TornFinalLineRecovered) {
 
   // Reopen heals and appending resumes at the right sequence.
   auto w2 = open_ok(f.path());
+  EXPECT_TRUE(w2.recovery_repaired());
   EXPECT_EQ(w2.next_sequence(), 5u);
   ASSERT_FALSE(w2.append({5, "after-heal"}).has_value());
   const auto final_read = read_journal(f.path());

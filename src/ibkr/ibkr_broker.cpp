@@ -139,8 +139,9 @@ BrokerSnapshot IbkrBroker::snapshot() {
   std::unique_lock<std::mutex> lk(i.m);
   i.cv.wait_for(lk, std::chrono::seconds(10),
                 [&i] { return i.positions_done && i.orders_done; });
-  // On timeout: partial snapshot => reconcile reports mismatches =>
-  // trading refused. Fail-closed by composition, not by exception.
+  // A timeout may produce a perfectly empty snapshot.
+  // Completeness must therefore be explicit.
+  i.building.complete = i.positions_done && i.orders_done;
   return i.building;
 }
 

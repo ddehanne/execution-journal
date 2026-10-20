@@ -4,6 +4,7 @@
 
 #include "broker/broker_port.hpp"
 #include "recovery/reconcile.hpp"
+#include "recovery/recovery_gate.hpp"
 
 using namespace ej::broker;
 using namespace ej::recovery;
@@ -71,4 +72,114 @@ TEST(Reconcile, OrderBookLies) {
   EXPECT_TRUE(phantom);
   EXPECT_TRUE(missing);
   EXPECT_FALSE(r.trading_allowed());
+}
+
+
+// M8-01: recovery gate remains independent of trading authorization.
+
+TEST(RecoveryGateM8, CleanStateWithoutUnresolvedApproval) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = true;
+  RecoveryEvidence evidence{true, 0};
+
+  const auto result = evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(result.status, RecoveryStatus::Verified);
+  EXPECT_TRUE(result.verified());
+}
+
+TEST(RecoveryGateM8, ApprovedButSubmissionUnknownBlocks) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = true;
+  RecoveryEvidence evidence{true, 1};
+
+  // Even a perfect broker snapshot does not prove non-submission.
+  const auto result = evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(
+      result.status,
+      RecoveryStatus::BlockedUnknownSubmission);
+  EXPECT_FALSE(result.verified());
+}
+
+TEST(RecoveryGateM8, BrokerMismatchBlocksRecovery) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = true;
+  reconciliation.mismatches.push_back({
+      MismatchKind::PhantomBrokerOrder,
+      "ord-unknown",
+      0,
+      5
+  });
+
+  RecoveryEvidence evidence{true, 0};
+
+  const auto result = evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(result.status, RecoveryStatus::BlockedMismatch);
+  EXPECT_FALSE(result.verified());
+}
+
+TEST(RecoveryGateM8, JournalIntegrityFailureBlocks) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = true;
+  RecoveryEvidence evidence{false, 0};
+
+  const auto result = evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(result.status, RecoveryStatus::BlockedIntegrity);
+  EXPECT_FALSE(result.verified());
+}
+
+TEST(RecoveryGateM8, IntegrityFailureDominatesOtherFailures) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = true;
+  reconciliation.mismatches.push_back({
+      MismatchKind::MissingBrokerOrder,
+      "ord-1",
+      5,
+      0
+  });
+
+  RecoveryEvidence evidence{false, 1};
+
+  const auto result = evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(result.status, RecoveryStatus::BlockedIntegrity);
+}
+
+
+TEST(Reconcile, IncompleteSnapshotBlocksTrading) {
+  LocalState local;
+  ej::broker::BrokerSnapshot snapshot;
+  snapshot.complete = false;
+
+  const auto report = reconcile(local, snapshot);
+
+  EXPECT_TRUE(report.mismatches.empty());
+  EXPECT_FALSE(report.trading_allowed());
+}
+
+TEST(Reconcile, CompleteEmptySnapshotCanReconcile) {
+  LocalState local;
+  ej::broker::BrokerSnapshot snapshot;
+  snapshot.complete = true;
+
+  const auto report = reconcile(local, snapshot);
+
+  EXPECT_TRUE(report.mismatches.empty());
+  EXPECT_TRUE(report.trading_allowed());
+}
+
+TEST(RecoveryGateM8, IncompleteSnapshotBlocksRecovery) {
+  ReconcileReport reconciliation;
+  reconciliation.broker_snapshot_complete = false;
+
+  RecoveryEvidence evidence{true, 0};
+
+  const auto result =
+      evaluate_recovery(evidence, reconciliation);
+
+  EXPECT_EQ(result.status, RecoveryStatus::BlockedMismatch);
+  EXPECT_FALSE(result.verified());
 }

@@ -147,6 +147,15 @@ std::variant<Coordinator, ej::journal::JournalError> Coordinator::open(
   auto writer =
       std::move(std::get<ej::journal::JournalWriter>(opened));
 
+  // A repaired journal may have lost an incomplete final decision.
+  // Do not silently resume coordination after recovery.
+  if (writer.recovery_repaired()) {
+    return ej::journal::JournalError{
+        ej::journal::JournalErrorKind::InteriorCorruption,
+        0,
+        "Journal recovery quarantine active: reconciliation required"};
+  }
+
   auto recovered = writer.snapshot();
   if (auto* error = std::get_if<ej::journal::JournalError>(&recovered)) {
     return *error;

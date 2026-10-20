@@ -29,6 +29,7 @@ void diff_maps(const std::map<std::string, std::int64_t>& local,
 ReconcileReport reconcile(const LocalState& local,
                           const ej::broker::BrokerSnapshot& broker) {
   ReconcileReport report;
+  report.broker_snapshot_complete = broker.complete;
   diff_maps(local.positions, broker.positions,
             MismatchKind::PhantomBrokerPosition,
             MismatchKind::MissingBrokerPosition,

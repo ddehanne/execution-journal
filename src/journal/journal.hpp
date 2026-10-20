@@ -84,13 +84,22 @@ class JournalWriter {
   // Read while this writer holds the exclusive journal lock.
   [[nodiscard]] ReadResult snapshot() const;
 
+  // True if this open repaired the journal OR a durable
+  // recovery quarantine marker is present.
+  // A marker survives process restarts and is not auto-cleared.
+  [[nodiscard]] bool recovery_repaired() const noexcept {
+    return recovery_repaired_;
+  }
+
  private:
   JournalWriter(std::string path, int fd, int lock_fd,
-                std::string last_hash, std::uint64_t next_seq) noexcept;
+                std::string last_hash, std::uint64_t next_seq,
+                bool recovery_repaired) noexcept;
   std::string path_;
   int fd_;
   int lock_fd_;
   bool poisoned_ = false;
+  bool recovery_repaired_ = false;
   std::string last_hash_;
   std::uint64_t next_seq_;
 };

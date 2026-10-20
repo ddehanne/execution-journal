@@ -9,6 +9,9 @@
 namespace ej::broker {
 
 struct BrokerSnapshot {
+  // False until all required snapshot streams completed.
+  // An incomplete snapshot must never authorize recovery.
+  bool complete = false;
   // symbol -> signed net units as REPORTED by the broker
   std::map<std::string, std::int64_t> positions;
   // order_id -> broker-visible open order (units remaining)
@@ -25,7 +28,11 @@ class BrokerPort {
 // including lies (phantom positions, missing orders, wrong quantities).
 class SimulatedBroker final : public BrokerPort {
  public:
-  [[nodiscard]] BrokerSnapshot snapshot() override { return state_; }
+  [[nodiscard]] BrokerSnapshot snapshot() override {
+    auto result = state_;
+    result.complete = true;
+    return result;
+  }
   void set_position(const std::string& symbol, std::int64_t units) {
     state_.positions[symbol] = units;
   }
