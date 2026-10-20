@@ -36,30 +36,78 @@ std::string tmp_path(const char* tag) {
 
 TEST(FaultInjection, F1_SigkillDuringAppendStorm_ReopenHeals) {
   const auto path = tmp_path("f1");
+  const auto lock_path = path + ".lock";
+
   std::remove(path.c_str());
+  std::remove(lock_path.c_str());
 
   const pid_t child = fork();
   ASSERT_GE(child, 0);
+
   if (child == 0) {
-    // Child: append as fast as possible until killed.
-    auto w = std::get<JournalWriter>(JournalWriter::open(path));
-    for (std::uint64_t s = 1;; ++s) {
-      if (w.append({s, "storm-" + std::to_string(s)}).has_value()) _exit(1);
+    auto opened = JournalWriter::open(path);
+    if (!std::holds_alternative<JournalWriter>(opened)) _exit(1);
+
+    auto& writer = std::get<JournalWriter>(opened);
+
+    for (std::uint64_t seq = 1;; ++seq) {
+      if (writer.append({seq, "storm-" + std::to_string(seq)}))
+        _exit(2);
     }
   }
-  usleep(150'000);  // let it write a few hundred records
-  kill(child, SIGKILL);
-  waitpid(child, nullptr, 0);
 
-  // Parent: reopen must heal to a valid prefix and allow appending.
-  auto opened = JournalWriter::open(path);
-  ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
-  auto& w = std::get<JournalWriter>(opened);
-  const auto back = read_journal(path);
-  ASSERT_TRUE(std::holds_alternative<Recovered>(back));
-  EXPECT_GT(ok(back).records.size(), 0u);  // real work survived
-  EXPECT_FALSE(w.append({w.next_sequence(), "post-crash"}).has_value());
+  usleep(150'000);
+
+  ASSERT_EQ(kill(child, SIGKILL), 0);
+
+  int status = 0;
+  ASSERT_EQ(waitpid(child, &status, 0), child);
+  ASSERT_TRUE(WIFSIGNALED(status));
+  EXPECT_EQ(WTERMSIG(status), SIGKILL);
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+
+    auto& writer = std::get<JournalWriter>(opened);
+
+    const auto recovered = read_journal(path);
+    ASSERT_TRUE(std::holds_alternative<Recovered>(recovered));
+
+    const auto& records = ok(recovered).records;
+    ASSERT_FALSE(records.empty());
+
+    for (std::size_t i = 0; i < records.size(); ++i) {
+      const auto expected_seq = static_cast<std::uint64_t>(i + 1);
+
+      EXPECT_EQ(records[i].sequence, expected_seq);
+      EXPECT_EQ(
+          records[i].payload,
+          "storm-" + std::to_string(expected_seq));
+    }
+
+    const auto next = static_cast<std::uint64_t>(records.size() + 1);
+
+    EXPECT_EQ(writer.next_sequence(), next);
+    ASSERT_FALSE(writer.append({next, "post-crash"}).has_value());
+
+    const auto final_read = read_journal(path);
+    ASSERT_TRUE(std::holds_alternative<Recovered>(final_read));
+
+    const auto& final_records = ok(final_read).records;
+    ASSERT_EQ(final_records.size(), records.size() + 1);
+
+    for (std::size_t i = 0; i < records.size(); ++i) {
+      EXPECT_EQ(final_records[i].sequence, records[i].sequence);
+      EXPECT_EQ(final_records[i].payload, records[i].payload);
+    }
+
+    EXPECT_EQ(final_records.back().sequence, next);
+    EXPECT_EQ(final_records.back().payload, "post-crash");
+  }
+
   std::remove(path.c_str());
+  std::remove(lock_path.c_str());
 }
 
 TEST(FaultInjection, F2_CrashBetweenDurabilityAndDispatch_NoDuplicatePath) {
