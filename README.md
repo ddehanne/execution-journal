@@ -2,8 +2,6 @@
 
 **C++20 · Execution Integrity · Fault Tolerance · Systems Engineering**
 
-> Testing ideas against reality.
-
 An independent engineering experiment investigating execution integrity in systematic trading infrastructure.
 
 The project examines how an execution system can preserve durable order intent, reconstruct state after interruptions, classify contradictory broker observations, and refuse unsafe progression when reconciliation remains unresolved.
