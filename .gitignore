@@ -16,3 +16,7 @@ build-public/
 
 # Generated CMake build directories
 build-*/
+
+# Local benchmark measurements
+benchmarks/results-local.csv
+benchmarks/environment-local.txt
