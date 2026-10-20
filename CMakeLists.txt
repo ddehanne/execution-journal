@@ -88,3 +88,17 @@ gtest_discover_tests(ej_tests)
 
 add_executable(ej-audit src/cli/main.cpp)
 target_link_libraries(ej-audit PRIVATE ej_core)
+option(EJ_BUILD_BENCHMARKS "Build journal benchmarks" OFF)
+
+if(EJ_BUILD_BENCHMARKS)
+    add_executable(journal_bench
+        benchmarks/journal_bench.cpp
+        src/journal/journal.cpp
+    )
+
+    target_include_directories(journal_bench PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+
+    target_compile_features(journal_bench PRIVATE cxx_std_20)
+endif()
