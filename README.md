@@ -178,7 +178,3 @@ Passing tests establishes only the behavior exercised under their specified cond
 The current research concerns execution integrity, durable state, and recovery under specified failure scenarios.
 
 Further engineering work and independent verification would be required before any production deployment.
-
----
-
-*Testing ideas against reality.*
