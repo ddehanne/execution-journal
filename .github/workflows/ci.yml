@@ -12,10 +12,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -S . -B build-public -DEJ_WITH_IBKR=OFF -DSANITIZE=OFF
+        run: cmake -S . -B build-public -DEJ_WITH_IBKR=OFF -DSANITIZE=OFF -DEJ_BUILD_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build-public --parallel 2
 
       - name: Test
         run: ctest --test-dir build-public --output-on-failure
+
+      - name: Run journal benchmark
+        run: ./build-public/journal_bench 1000
