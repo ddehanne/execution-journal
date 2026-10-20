@@ -110,6 +110,113 @@ TEST(FaultInjection, F1_SigkillDuringAppendStorm_ReopenHeals) {
   std::remove(lock_path.c_str());
 }
 
+
+TEST(FaultInjection, ConfirmedAppendsSurviveSigkill) {
+  const auto path = tmp_path("confirmed_durability");
+  const auto lock_path = path + ".lock";
+
+  std::remove(path.c_str());
+  std::remove(lock_path.c_str());
+
+  int pipefd[2];
+  ASSERT_EQ(::pipe(pipefd), 0);
+
+  const pid_t child = ::fork();
+  ASSERT_GE(child, 0);
+
+  if (child == 0) {
+    ::close(pipefd[0]);
+
+    auto opened = JournalWriter::open(path);
+    if (!std::holds_alternative<JournalWriter>(opened)) _exit(1);
+
+    auto& writer = std::get<JournalWriter>(opened);
+
+    for (std::uint64_t seq = 1;; ++seq) {
+      if (writer.append({seq, "confirmed-" + std::to_string(seq)}))
+        _exit(2);
+
+      // Acknowledgement is sent only after append succeeds.
+      const auto* bytes = reinterpret_cast<const char*>(&seq);
+      std::size_t sent = 0;
+
+      while (sent < sizeof(seq)) {
+        const ssize_t n =
+            ::write(pipefd[1], bytes + sent, sizeof(seq) - sent);
+
+        if (n <= 0) _exit(3);
+        sent += static_cast<std::size_t>(n);
+      }
+    }
+  }
+
+  ::close(pipefd[1]);
+
+  // Collect a fixed number of successful append acknowledgements.
+  constexpr std::uint64_t kAcknowledged = 100;
+
+  for (std::uint64_t expected = 1; expected <= kAcknowledged;
+       ++expected) {
+    std::uint64_t received = 0;
+    auto* bytes = reinterpret_cast<char*>(&received);
+    std::size_t got = 0;
+
+    while (got < sizeof(received)) {
+      const ssize_t n =
+          ::read(pipefd[0], bytes + got, sizeof(received) - got);
+
+      ASSERT_GT(n, 0);
+      got += static_cast<std::size_t>(n);
+    }
+
+    ASSERT_EQ(received, expected);
+  }
+
+  ASSERT_EQ(::kill(child, SIGKILL), 0);
+
+  int status = 0;
+  ASSERT_EQ(::waitpid(child, &status, 0), child);
+  ASSERT_TRUE(WIFSIGNALED(status));
+  EXPECT_EQ(WTERMSIG(status), SIGKILL);
+
+  ::close(pipefd[0]);
+
+  {
+    auto opened = JournalWriter::open(path);
+    ASSERT_TRUE(std::holds_alternative<JournalWriter>(opened));
+
+    const auto recovered = read_journal(path);
+    ASSERT_TRUE(std::holds_alternative<Recovered>(recovered));
+
+    const auto& records = ok(recovered).records;
+
+    ASSERT_GE(records.size(),
+              static_cast<std::size_t>(kAcknowledged));
+
+    // Every acknowledged append must survive recovery.
+    for (std::uint64_t seq = 1; seq <= kAcknowledged; ++seq) {
+      const auto& record = records[seq - 1];
+
+      EXPECT_EQ(record.sequence, seq);
+      EXPECT_EQ(record.payload,
+                "confirmed-" + std::to_string(seq));
+    }
+
+    // Any additional recovered records must also form
+    // a contiguous, unmodified prefix.
+    for (std::size_t i = 0; i < records.size(); ++i) {
+      const auto seq = static_cast<std::uint64_t>(i + 1);
+
+      EXPECT_EQ(records[i].sequence, seq);
+      EXPECT_EQ(records[i].payload,
+                "confirmed-" + std::to_string(seq));
+    }
+  }
+
+  std::remove(path.c_str());
+  std::remove(lock_path.c_str());
+}
+
 TEST(FaultInjection, F2_CrashBetweenDurabilityAndDispatch_NoDuplicatePath) {
   const auto path = tmp_path("f2");
   std::remove(path.c_str());
