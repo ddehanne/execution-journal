@@ -1,56 +1,38 @@
 # execution-journal
 
-C++20 execution integrity engine — order lifecycle, durable journaling,
-crash recovery, and broker reconciliation for systematic trading systems.
+**C++20 · Execution Integrity · Fault Tolerance · Systems Engineering**
 
-**Status: v0.1 — offline core reproducible.**
+An independent engineering experiment investigating execution integrity in systematic trading infrastructure.
 
-**Verified locally (2026-10-18): 32/32 tests passed** on Apple Silicon
-with Apple Clang 21 and CMake 4.4.4, without the proprietary IBKR SDK.
+The project examines how an execution system can preserve durable order intent, reconstruct state after interruptions, classify contradictory broker observations, and refuse unsafe progression when reconciliation remains unresolved.
 
-The test suite exercises order-state anomalies, journal corruption,
-risk controls, broker reconciliation, and fault injection, including
-a real SIGKILL during journal writes.
+**Status:** v0.1 — offline core reproducible.
 
-The optional IBKR adapter was reportedly exercised during earlier
-development against an IBKR paper gateway (read-only snapshot).
-That integration, and the historical sanitizer results, were not
-revalidated in the October 18 verification session.
+## Research Question
 
-Companion to [verified-ledger](https://github.com/ddehanne/verified-ledger)
-(Rust): a related correctness-oriented design, adapted for C++ execution
-engineering. This repository addresses order state, durability,
-reconciliation, and broker integration; verification evidence for
-each repository must be assessed independently.
+Can an execution system maintain a coherent, recoverable account of order intent and external observations across crashes, interrupted writes, and inconsistent broker reports?
 
-**Latest local development run (2026-10-20): 62/62 tests passed
-in 0.47 seconds.** This result concerns a working tree containing
-uncommitted changes and does not constitute verification of the
-published repository revision.
+The central engineering problem is not merely recording events. It is determining what the system can safely conclude from durable local evidence and potentially incomplete external information.
 
-## Design Laws
+## Engineering Principles
 
 ### 1. Durable state
 
-The journal is the authoritative durable state — not a write-ahead
-log for another database.
+The journal is the authoritative local durable record.
 
-Application state is reconstructed through deterministic replay.
+Application state is reconstructed through deterministic replay rather than treated as independently authoritative.
 
-### 2. Intent vs. eligibility
+### 2. Intent before execution
 
-An order intent exists from creation.
+An order intent exists before it becomes eligible for dispatch.
 
-The fsync durability barrier gates its eligibility for broker dispatch.
+The durability barrier separates recorded intent from dispatch eligibility.
 
-An intent must not be submitted before its durable local proof exists.
+Local durability confirmation and broker acknowledgement remain distinct.
 
-Local durability confirmation is distinct from broker acknowledgement.
+### 3. Evidence over assumptions
 
-### 3. Evidence over intention
-
-Anomalous broker reports are representable, classified, and
-quarantined with evidence preserved.
+Contradictory broker observations must be representable and classified.
 
 Examples include:
 
@@ -59,114 +41,45 @@ Examples include:
 - Late fill after a terminal state.
 - Overfill.
 
-Contradictory observations are not silently discarded.
+Anomalous observations are preserved rather than silently discarded.
 
-### 4. Reconciliation before trading
+### 4. Reconciliation before progression
 
-At startup, replayed local state is compared against a fresh
-broker snapshot.
+Recovered local state is compared with an external broker snapshot.
 
-Divergences are classified, and unresolved mismatches prevent
-trading progression.
+Unresolved discrepancies prevent trading progression.
 
-The engine does not assume either side is automatically correct.
+The system does not assume that either source is automatically correct.
 
-### 5. Persistent kill switch
+### 5. Conservative failure behavior
 
-The kill switch is implemented as a persistent file latch.
+The implementation includes a persistent kill-switch mechanism and explicit handling of selected failure conditions.
 
-It survives restarts, is checked at each decision, and is cleared
-only by deliberate external action.
-
-### 6. Explicit failure handling
-
-Fallible operations return typed values using mechanisms such as
-`std::optional` and `std::variant`.
-
-Invalid input is represented as a value rather than relying on
-exceptions for control flow.
+Failure handling is designed to avoid silently converting uncertainty into permission to proceed.
 
 ## Architecture
 
 | Component | Responsibility |
 |---|---|
-| `src/core/` | Strong types, sequence identifiers, and checked arithmetic |
-| `src/lifecycle/` | Deterministic order-state machine and anomaly classification |
-| `src/journal/` | Durable append-only journal, integrity checks, and replay |
-| `src/risk/` | Versioned risk configuration, position limits, and kill switch |
-| `src/broker/` | Broker abstraction and simulated broker |
-| `src/execution/` | Execution coordination |
-| `src/recovery/` | Broker reconciliation and recovery controls |
-| `src/ibkr/` | Optional Interactive Brokers TWS API adapter |
-| `src/cli/` | Audit, status, and replay commands |
+| `core` | Strong types, checked arithmetic, sequence identifiers |
+| `lifecycle` | Deterministic order-state transitions and anomaly classification |
+| `journal` | Durable append-only records, integrity checks, replay |
+| `risk` | Versioned risk configuration, position limits, kill switch |
+| `broker` | Broker abstraction and simulated broker |
+| `execution` | Execution coordination |
+| `recovery` | Reconciliation and recovery-related controls |
+| `ibkr` | Optional Interactive Brokers adapter |
+| `cli` | Audit, status, and replay commands |
 
-### Journal integrity
+The journal uses chained record hashes and SHA-256 integrity checks.
 
-The journal uses an append-only record structure:
-
-```text
-sequence | previous_hash | record_hash | payload
-```
-
-Integrity checks use a local SHA-256 implementation.
-
-The implementation includes:
-
-- Checked sequence progression.
-- Chained record hashes.
-- Durability barriers using `fsync`.
-- Recovery from selected torn-tail conditions.
-- Fatal handling of interior corruption.
-- Deterministic replay.
-
-A torn final record can be recovered and healed through the
-documented recovery mechanism.
-
-Interior corruption is treated as fatal rather than silently repaired.
-
-### Risk controls
-
-The risk layer includes:
-
-- Versioned `RiskConfig`.
-- Configuration content hashing.
-- Notional limits.
-- Position limits based on projected absolute net exposure.
-- Persistent kill-switch enforcement.
-
-### Broker interface
-
-The broker abstraction separates execution coordination from
-broker-specific implementations.
-
-A scriptable simulated broker supports testing of incomplete,
-contradictory, and anomalous broker observations.
-
-### Recovery and reconciliation
-
-Recovery compares reconstructed local state against external
-broker observations.
-
-The reconciliation mechanism classifies discrepancies and
-prevents progression when unresolved mismatches remain.
-
-### Optional IBKR integration
-
-The optional adapter uses the Interactive Brokers TWS API
-behind the broker abstraction.
-
-Its implementation includes an `EReader` thread and
-bounded-blocking snapshot handling.
-
-Incomplete snapshots are intended to produce conservative
-failure behavior rather than authorization to proceed.
-
-The offline verification results do not establish correctness
-of the real-broker integration.
+The implementation distinguishes recoverable torn-tail conditions from interior corruption, which is treated as fatal.
 
 ## Verification
 
-### Reproduced offline baseline — October 18, 2026
+### Reproduced baseline — October 18, 2026
+
+The previously documented offline verification reported:
 
 | Property | Result |
 |---|---|
@@ -174,124 +87,53 @@ of the real-broker integration.
 | Compiler | Apple Clang 21 |
 | Build system | CMake 4.4.4 |
 | IBKR SDK | Not required |
-| Sanitizers | Disabled |
 | Tests | 32/32 passed |
 
-This verification exercised the offline C++20 core without
-the proprietary IBKR SDK.
+### Local development verification — October 20, 2026
 
-### Local development run — October 20, 2026
+A subsequent local test execution reported:
 
-**Result: 62/62 tests passed.**
+**62/62 tests passed — 0.47 seconds.**
 
-**Reported execution time: 0.47 seconds.**
+This result relates to a development working tree containing modifications not yet incorporated into the documented repository baseline.
 
-This result was obtained on a local development working tree
-containing modifications not yet committed to the repository.
+It should not be interpreted as independent verification of a published revision.
 
-The result has not been independently reproduced against a
-clean checkout of the corresponding revision.
+### Verification scope
 
-### Test coverage
+The documented test coverage includes scenarios involving:
 
-The documented verification scenarios include:
+- Order-state anomalies.
+- Journal corruption.
+- Interrupted writes and recovery.
+- Crash-related fault injection.
+- Risk controls.
+- Broker reconciliation.
+- Incomplete broker observations.
 
-**Order lifecycle**
+Selected fault-injection tests use real process termination.
 
-- Fill before acknowledgement.
-- Fill during cancellation.
-- Late fill after a terminal state.
-- Overfill.
-- Classification of anomalous transitions.
-
-**Journal integrity**
-
-- Torn final record.
-- Missing trailing newline.
-- Interior corruption.
-- Removed interior record.
-- Hash-chain discontinuity.
-- Crash, reopen, heal, and append.
-
-**Fault injection**
-
-- Real `SIGKILL` during journal writes.
-- Crash between durability confirmation and dispatch.
-- Recovery of durable but undispatched intent.
-- Incomplete broker snapshot.
-- Refusal to proceed when reconciliation remains unresolved.
-
-**Risk and reconciliation**
-
-- Risk configuration enforcement.
-- Position and notional controls.
-- Persistent kill-switch behavior.
-- Classification of local/broker discrepancies.
-- Conservative handling of unresolved mismatches.
-
-These scenarios describe the documented test scope.
-They do not establish exhaustive failure coverage.
+The offline test suite does not establish production safety, exhaustive fault coverage, or reliability against a live broker.
 
 ### Historical verification
 
 Earlier development reportedly included:
 
-- AddressSanitizer testing.
-- UndefinedBehaviorSanitizer testing.
+- AddressSanitizer and UndefinedBehaviorSanitizer runs.
 - ThreadSanitizer testing.
-- Interactive Brokers paper-gateway snapshot testing.
+- An Interactive Brokers paper-gateway snapshot exercise.
 
-Historical ThreadSanitizer results reportedly identified
-no data races in the tested configuration.
-
-These results were not independently reproduced during
-the October 18 verification session.
-
-The historical results must not be interpreted as current
-validation of the latest development changes.
-
-### Compiler diagnostics
-
-The project documents strict compiler warnings for its
-own code:
-
-```text
--Wall
--Wextra
--Wpedantic
--Wconversion
--Wshadow
-```
-
-Third-party dependencies are isolated from the project's
-warning policy.
-
-### Verification boundaries
-
-Passing the offline test suite does not establish:
-
-- Production readiness.
-- Correctness under every possible failure.
-- Real-broker execution reliability.
-- Safety of live financial orders.
-- Absence of all concurrency defects.
-- Trading profitability or economic advantage.
-
-Verification evidence applies only to the configurations,
-revisions, and scenarios actually tested.
+These results were not reproduced during the October 18 verification session and should not be treated as current integration validation.
 
 ## Build and Reproduce
 
-### Requirements
+Requirements:
 
 - C++20-compatible compiler.
 - CMake 3.22 or later.
 - Network access to retrieve GoogleTest.
 
-The offline core, audit CLI, and tests build without
-the proprietary IBKR SDK.
-
-### Offline build
+The offline core, CLI, and tests build without the proprietary IBKR SDK.
 
 ```bash
 cmake -S . -B build-public -DEJ_WITH_IBKR=OFF -DSANITIZE=OFF
@@ -305,43 +147,34 @@ Alternatively:
 ./check.sh
 ```
 
-The verification script configures, builds, and executes
-the test suite.
-
-It does not include a separate CLI smoke test.
+The verification script configures, builds, and executes the test suite. It does not include a separate CLI smoke test.
 
 ### Optional IBKR Adapter
 
-The optional Interactive Brokers adapter requires separately
-obtained licensed dependencies.
+The optional Interactive Brokers adapter requires separately obtained licensed dependencies.
 
 See `third_party/README.md` for dependency information.
 
-Configure with:
+The real-broker integration is not validated by the offline test results.
 
-```bash
-cmake -S . -B build-ibkr -DEJ_WITH_IBKR=ON
-```
+## Research Boundaries
 
-The optional IBKR build and real-broker integration were
-not revalidated during the documented offline verification.
+This repository investigates selected engineering properties of execution systems.
 
-## Scope and Limitations
+It does not demonstrate:
 
-This repository investigates selected engineering properties
-of execution systems:
+- Production readiness.
+- Safety under every possible failure.
+- Correctness of all real-broker interactions.
+- Real-money execution reliability.
+- Trading profitability or economic advantage.
 
-- Durable state representation.
-- Deterministic recovery.
-- Order lifecycle integrity.
-- Classification of contradictory observations.
-- Broker reconciliation.
-- Conservative behavior under uncertainty.
+Passing tests establishes only the behavior exercised under their specified conditions.
 
-It is an engineering prototype, not a production trading system.
+## Development Status
 
-The implementation and its tests provide evidence for
-specified behaviors under specified conditions.
+**v0.1 — Offline engineering prototype**
 
-They do not constitute a guarantee of operational safety,
-complete correctness, or economic performance.
+The current research concerns execution integrity, durable state, and recovery under specified failure scenarios.
+
+Further engineering work and independent verification would be required before any production deployment.
