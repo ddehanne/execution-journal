@@ -157,6 +157,40 @@ TEST(Journal, TornFinalLineRecovered) {
   EXPECT_EQ(ok(final_read).records.size(), 5u);
 }
 
+
+TEST(Journal, RecoveryQuarantineSurvivesTwoRestarts) {
+  TmpFile f;
+
+  {
+    auto writer = open_ok(f.path());
+    append_n(writer, 4);
+  }
+
+  {
+    std::ofstream out(f.path(), std::ios::binary | std::ios::app);
+    ASSERT_TRUE(out.is_open());
+    out << "5|incomplete";
+    out.flush();
+    ASSERT_TRUE(out.good());
+  }
+
+  for (int restart = 0; restart < 3; ++restart) {
+    auto writer = open_ok(f.path());
+
+    EXPECT_TRUE(writer.recovery_repaired());
+    EXPECT_EQ(writer.next_sequence(), 5u);
+  }
+
+  const auto recovered = read_journal(f.path());
+
+  ASSERT_TRUE(std::holds_alternative<Recovered>(recovered));
+
+  const auto& state = std::get<Recovered>(recovered);
+
+  EXPECT_FALSE(state.recovered_truncated_tail);
+  EXPECT_EQ(state.records.size(), 4u);
+}
+
 TEST(Journal, MissingTrailingNewlineOnValidLastLineIsFine) {
   TmpFile f;
   {
