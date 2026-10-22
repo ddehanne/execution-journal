@@ -157,6 +157,51 @@ See `third_party/README.md` for dependency information.
 
 The real-broker integration is not validated by the offline test results.
 
+## Experimental Findings — October 22, 2026
+
+### M8-01 — Persistent recovery quarantine
+
+**Research question:** Does recovery quarantine remain effective after repeated journal reopenings, preventing an execution coordinator from silently resuming after a repaired journal?
+
+**Method:**
+
+- Construct a journal containing valid records.
+- Append an incomplete final record to simulate an interrupted write.
+- Trigger journal recovery.
+- Reopen the journal repeatedly.
+- Attempt to reopen the execution coordinator after recovery.
+
+**Observed results:**
+
+- The journal reported its repaired state across repeated reopenings.
+- Previously valid records remained readable.
+- The coordinator rejected repeated attempts to resume from the repaired journal.
+- The complete local test suite passed: **72/72 tests**.
+
+**Regression tests:**
+
+- `Journal.RecoveryQuarantineSurvivesTwoRestarts`
+- `Coordinator.RejectsRepairedJournalAfterRepeatedReopens`
+
+**Local commits:**
+
+- `9044a41` — Journal quarantine regression.
+- `5add630` — Coordinator recovery refusal regression.
+
+**Limitations:**
+
+The new regression tests exercise repeated reopenings within a single process. They do not independently establish persistence across separate process lifetimes or durability after abrupt machine failure.
+
+The results do not establish production readiness, exhaustive crash safety, or real-broker integration correctness.
+
+**Conclusion:**
+
+Within the tested scenarios, recovery quarantine remains effective after repeated journal reopenings, and the coordinator refuses unsafe resumption.
+
+The M8-01 investigation was closed with the documented limitations accepted.
+
+---
+
 ## Research Boundaries
 
 This repository investigates selected engineering properties of execution systems.
