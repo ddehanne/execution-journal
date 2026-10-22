@@ -176,7 +176,8 @@ The real-broker integration is not validated by the offline test results.
 - The journal reported its repaired state across repeated reopenings.
 - Previously valid records remained readable.
 - The coordinator rejected repeated attempts to resume from the repaired journal.
-- The complete local test suite passed: **72/72 tests**.
+- The development working tree passed **72/72 tests**; this result includes changes outside the isolated public revision.
+- The isolated public revision passed **65/65 tests** on a separate clean worktree.
 
 **Regression tests:**
 
